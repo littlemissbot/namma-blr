@@ -1,0 +1,14 @@
+{
+  "id": "cubbon-park-upgrade",
+  "name": "Cubbon Park upgrade",
+  "agency": "BDA",
+  "category": "parks_public",
+  "scope": "Park development/upgrade works at Cubbon Park, announced by the Deputy Chief Minister during a public 'Walk with Bengaluru' programme",
+  "status": "announced",
+  "pending": "No tender, sanction order, or defined scope of works located yet — this is currently a verbal grant announcement, not a defined project.",
+  "wards": [],
+  "corporation": "Central",
+  "confidence": "medium",
+  "verified_on": "2026-09-20",
+  "notes": "First parks_public record on this site. This is the thinnest kind of record the site tracks: a single announced figure with no DPR, tender or sanction order behind it yet, kept deliberately rather than left out — the absence of anything more substantial is itself the finding (spec P2). A separate, larger ₹40 cr Cubbon Park redevelopment plan (Smart City-era, phased) and a ₹250 cr, 153-acre Basavanna Biodiversity Park near Yelahanka (Forest Department / KFDC, cabinet-approved 2026-01-03) were also found during collection but are not recorded here: the biodiversity park's implementing agency does not fit this site's tracked agency list, and the older Cubbon Park smart-city figures were not independently re-verified in this pass."
+}

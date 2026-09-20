@@ -1,0 +1,11 @@
+{
+  "project_id": "green-line-ext-madavar",
+  "fiscal_year": "2024-25",
+  "kind": "revised_cost",
+  "amount_cr": 298,
+  "funder": "state",
+  "funder_detail": "Total construction cost as reported at opening. Other reporting found in this collection pass gives different figures for what may be different scope (a ₹247.41 cr civil contract to Simplex Infrastructure Limited, awarded ~February 2017; a separate ₹1,168 cr figure including ₹152 cr land acquisition) — neither of those two was independently confirmed against a fetchable source, so only this ₹298 cr figure is recorded; see project notes.",
+  "source_id": "S37",
+  "as_of": "2024-11-07",
+  "comparable_to_prior": true
+}

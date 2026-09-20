@@ -1,0 +1,16 @@
+{
+  "id": "blue-line-phase-2b",
+  "name": "Blue Line Phase 2B",
+  "aka": ["Airport Line Phase 2B"],
+  "agency": "BMRCL",
+  "category": "metro_rail",
+  "scope": "38.44 km, Krishnarajapura (KR Puram) to Kempegowda International Airport, including Kempapura, Kalyan Nagar, Veerannapalya and HRBR Layout stations; part of Namma Metro Phase 2's Blue (Airport) Line. Construction began 2022-02.",
+  "status": "under_construction",
+  "current_deadline": "2027-12-01",
+  "pending": "As of 2025-06-30, physical progress on the combined Phase 2A+2B corridor was 52.5%, financial progress 55.89% (PropNewz). Multiple stations under construction; planned opening December 2027, per The Metro Rail Guy.",
+  "wards": [],
+  "corporation": "North",
+  "confidence": "medium",
+  "verified_on": "2026-09-20",
+  "notes": "The combined Phase 2A+2B cost figure (₹14,788.101 cr, 58.19 km) is recorded once, on blue-line-phase-2a, to avoid double-counting in this site's aggregate totals — see that project's notes for the figure and its funding breakdown. One package-level contract specific to this phase is on file here: ₹182.33 cr for the Airport Depot at Doddajala (J Kumar–AIC Infrastructures JV, awarded 2023-03-21), a small fraction of the whole 38.44 km phase, not a project total."
+}

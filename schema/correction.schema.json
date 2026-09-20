@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://namma-bengaluru/schema/correction.schema.json",
+  "title": "correction",
+  "description": "Spec §6.5. Public, dated, permanent log of corrections. Stored as an array in data/corrections.json.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["id", "date", "project_id", "was", "now", "raised_by", "resolved_by_source_id"],
+    "properties": {
+      "id": { "type": "string", "description": "e.g. C1, C2 ..." },
+      "date": { "type": "string", "format": "date" },
+      "project_id": { "type": "string", "description": "FK to project.id" },
+      "was": { "type": "string", "description": "What was wrong" },
+      "now": { "type": "string", "description": "What it now says" },
+      "raised_by": { "type": "string", "description": "Who raised it (e.g. \"reader\", \"BMRCL\", \"self-review\")" },
+      "resolved_by_source_id": { "type": "string", "description": "FK to source.id — what source resolved it" }
+    }
+  }
+}

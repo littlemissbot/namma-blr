@@ -1,0 +1,14 @@
+{
+  "id": "purple-line-ext-whitefield",
+  "name": "Purple Line extension: Baiyyappanahalli – Whitefield",
+  "aka": ["Purple Line Whitefield extension"],
+  "agency": "BMRCL",
+  "category": "metro_rail",
+  "scope": "15.26 km eastern extension of the Purple Line, part of Namma Metro Phase 2",
+  "status": "complete",
+  "wards": [],
+  "corporation": "East",
+  "confidence": "medium",
+  "verified_on": "2026-09-20",
+  "notes": "Opened in two sections: Baiyyappanahalli–KR Pura (2023-03) and KR Pura–Whitefield (2023-10), per The Metro Rail Guy. No money_entry recorded yet — a ₹4,845 cr figure, and separately a Reach 1A/1B breakdown (₹670.72 cr + ₹666.12 cr = ₹1,300 cr to \"Italian-Thai Development\", tendered Dec 2016, awarded May 2017) were reported but could not be directly verified against a fetchable primary or news source in two collection passes — the Deccan Herald article usually cited for this is not fetchable, and a themetrorailguy.com article covering this line's construction names the contractor as \"ITD Cementation India\" rather than \"Italian-Thai Development\" without giving a value, which may or may not be the same reporting (ITD Cementation India is a related but legally distinct, India-listed subsidiary of the Thai parent company). Given the unresolved contractor-name discrepancy, no cost figure is recorded here pending clearer sourcing."
+}

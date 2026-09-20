@@ -1,0 +1,14 @@
+{
+  "id": "green-line-ext-madavar",
+  "name": "Green Line extension: Nagasandra – Madavar",
+  "aka": ["Green Line Madavara extension"],
+  "agency": "BMRCL",
+  "category": "metro_rail",
+  "scope": "3.03 km northern extension of the Green Line, part of Namma Metro Phase 2",
+  "status": "complete",
+  "wards": [],
+  "corporation": "North",
+  "confidence": "medium",
+  "verified_on": "2026-09-20",
+  "notes": "Became operational 2024-11-07, per The Metro Rail Guy and independently per Metro Rail News. Cost reporting conflicts across sources: ₹298 cr (Metro Rail News, at opening — recorded here), a separate ₹247.41 cr civil contract to Simplex Infrastructure Limited awarded ~February 2017, and a ₹1,168 cr figure including ₹152 cr land acquisition (both from unconfirmed secondary reporting, not recorded as figures). These may describe different scopes (one contract package vs. total project vs. total including land) rather than a true conflict, but this has not been resolved."
+}

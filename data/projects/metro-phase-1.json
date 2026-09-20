@@ -1,0 +1,15 @@
+{
+  "id": "metro-phase-1",
+  "name": "Namma Metro Phase 1",
+  "aka": ["Purple Line (original)", "Green Line (original)"],
+  "agency": "BMRCL",
+  "category": "metro_rail",
+  "scope": "42.3 km, 40 stations across the East-West and North-South corridors",
+  "status": "complete",
+  "sanction_date": "2006-01-01",
+  "wards": [],
+  "corporation": "Central",
+  "confidence": "medium",
+  "verified_on": "2026-09-19",
+  "notes": "The site's earliest-dated record, added deliberately per spec P9 (pre-2020 history is the main defence against the site being read as partisan). sanction_date is year-level precision only — \"It was in 2006 that Phase I was sanctioned\" (The News Minute, 2016-10-20) does not give a specific date. Other figures for this project circulate in search results — a ₹5,400 cr or ₹6,395 cr original sanction, and a ₹14,291.28 cr amount \"spent by January 2017\" — but this collection pass could not independently verify any of them against their original source text, so they are deliberately withheld rather than recorded on an unconfirmed basis. Only the ₹13,800 cr figure directly confirmed from The News Minute is recorded below; note it may itself already reflect cost escalation from the 2006 sanction rather than the original approved figure — the source does not make this distinction explicit."
+}

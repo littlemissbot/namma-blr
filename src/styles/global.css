@@ -1,0 +1,319 @@
+/* Design tokens and cross-page component classes. Astro scopes <style>
+ * blocks per-component, so anything used across more than one .astro file
+ * (status tabs, confidence stamps, the stage tracker, tables, links,
+ * headings) has to live here rather than in Base.astro's own <style>. */
+
+:root {
+  color-scheme: light dark;
+
+  /* Paper & ink — kraft ledger paper, iron-gall ink. Not pure cream/black. */
+  --paper: #efe9d8;
+  --paper-raised: #f8f4e8;
+  --ink: #211d15;
+  --ink-muted: #5b5445;
+  --rule: #cfc3a1;
+  --rule-strong: #a89a72;
+
+  /* Brand accent — red tape / red-oxide, the color that literally binds
+     Indian government files. Used for links, focus, and the one bold
+     gesture on the page; never for status. */
+  --accent: #a23b2e;
+  --accent-ink: #f8f4e8;
+
+  /* Status — a fixed palette, semantically bucketed from the project
+     status enum. Reserved for status only (spec §5.1: colour by status,
+     not agency), never decorative elsewhere. */
+  --status-announced: #8a8065;
+  --status-sanctioned: #35577a;
+  --status-progress: #b4791a;
+  --status-complete: #1e4b3c;
+  --status-stalled: #8c2f2f;
+
+  /* Card surface — a shade lighter than the page, for the rounded-card layer. */
+  --card-bg: #f9f6ec;
+  --card-shadow: 0 1px 2px rgba(60, 50, 20, 0.06), 0 8px 20px -12px rgba(60, 50, 20, 0.18);
+
+  /* Tinted pill backgrounds — status/confidence pills sit on these, never on --card-bg directly. */
+  --status-announced-bg: #eceadf;
+  --status-sanctioned-bg: #e3ebf3;
+  --status-progress-bg: #f7e9cf;
+  --status-complete-bg: #dfeae4;
+  --status-stalled-bg: #f3e0dd;
+
+  --font-display: "Zilla Slab", ui-serif, Georgia, serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+
+  --content-width: 74rem;
+  --measure: 62ch;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --radius-pill: 999px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #17150f;
+    --paper-raised: #201c14;
+    --ink: #ece4cf;
+    --ink-muted: #a99a78;
+    --rule: #3a3325;
+    --rule-strong: #4d4530;
+    --accent: #e0927e;
+    --accent-ink: #17150f;
+    --status-announced: #b3a98a;
+    --status-sanctioned: #8fb0d6;
+    --status-progress: #e0aa4f;
+    --status-complete: #6fb89a;
+    --status-stalled: #d98a83;
+
+    --card-bg: #1d1a12;
+    --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 20px -12px rgba(0, 0, 0, 0.5);
+
+    --status-announced-bg: #2b2a22;
+    --status-sanctioned-bg: #223140;
+    --status-progress-bg: #3a2f18;
+    --status-complete-bg: #1c3129;
+    --status-stalled-bg: #3a2320;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--paper); }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.15;
+  margin: 0 0 0.5em;
+  letter-spacing: -0.01em;
+}
+h1 { font-size: clamp(1.9rem, 1.5rem + 1.8vw, 2.9rem); font-weight: 700; }
+h2 { font-size: 1.4rem; margin-top: 2.5rem; }
+h3 { font-size: 1.1rem; }
+
+p { max-width: var(--measure); }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.wrap {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding-inline: 1.5rem;
+}
+
+/* ---- Key/value fields — a document's own metadata, not a middot string ---- */
+.fields {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 1rem;
+  font-size: 0.95rem;
+  max-width: 34rem;
+  margin-block: 1rem 1.5rem;
+}
+.fields dt { color: var(--ink-muted); }
+.fields dd { margin: 0; }
+
+/* ---- Status pill — the one place colour carries meaning ---- */
+.status-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-pill);
+  background: var(--status-announced-bg);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1;
+}
+.status-tab::before {
+  content: "";
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+.status-announced { color: var(--status-announced); background: var(--status-announced-bg); }
+.status-sanctioned, .status-tendering, .status-awarded { color: var(--status-sanctioned); background: var(--status-sanctioned-bg); }
+.status-under_construction, .status-partially_open { color: var(--status-progress); background: var(--status-progress-bg); }
+.status-complete { color: var(--status-complete); background: var(--status-complete-bg); }
+.status-stalled, .status-cancelled { color: var(--status-stalled); background: var(--status-stalled-bg); }
+
+/* ---- Confidence pill — still a material property (border weight), now pill-shaped ---- */
+.confidence {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.28rem 0.7rem;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--ink-muted);
+  color: var(--ink-muted);
+  background: var(--card-bg);
+  line-height: 1;
+}
+.confidence-high { border-style: solid; border-color: var(--ink); color: var(--ink); }
+.confidence-medium { border-style: dashed; }
+.confidence-low { border-style: dotted; }
+
+/* ---- Buttons & form controls — shared rounded style ---- */
+.btn, input[type="text"], input[type="search"], select {
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-sm);
+  background: var(--card-bg);
+  color: var(--ink);
+}
+.btn {
+  cursor: pointer;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.btn:hover { border-color: var(--ink-muted); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn-primary:hover { opacity: 0.92; border-color: var(--accent); }
+
+/* ---- Card surface — the base unit of the GTrack/KAUN-inspired layout ---- */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  padding: 1.25rem 1.4rem;
+}
+
+/* ---- Filter bar — shared by the homepage case-file grid and the project
+   table; a class reused across files has to live here, not in either page's
+   own <style>, or it silently applies to only one of them. ---- */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.75rem 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+.filter-bar label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+.filter-bar input,
+.filter-bar select {
+  min-width: 9rem;
+}
+.filter-bar button { padding: 0.5rem 0.9rem; border-radius: var(--radius-pill); cursor: pointer; font-weight: 600; }
+.filter-bar button:hover { border-color: var(--ink-muted); }
+.filter-count { font-size: 0.85rem; color: var(--ink-muted); margin: 0.9rem 0 0.6rem; }
+.filter-empty {
+  font-size: 0.9rem;
+  padding: 1.25rem;
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+  text-align: center;
+}
+.filter-empty button {
+  font: inherit;
+  color: var(--accent);
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* ---- Pill row — a flex row of status/confidence/source-count pills.
+   Global because it's reused across the homepage cards and the project
+   detail hero; Astro scopes <style> blocks per-component, so a class shared
+   across files has to live here, not in either page's own <style>. ---- */
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 0.75rem;
+}
+@media (max-width: 30rem) {
+  .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.stat-cell {
+  background: var(--paper-raised);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 0.9rem;
+}
+.stat-cell .stat-label { font-size: 0.72rem; color: var(--ink-muted); margin-bottom: 0.25rem; }
+.stat-cell .stat-value { font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+
+.pill-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+.pill-link:hover { text-decoration: underline; }
+
+/* ---- Stage tracker — Namma Metro's own line-diagram, repurposed ---- */
+.stage-tracker {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-block: 0.6rem;
+}
+.stage-tracker .seg {
+  flex: 1;
+  height: 2px;
+  background: var(--rule-strong);
+}
+.stage-tracker .seg.filled { background: var(--status-complete); }
+.stage-tracker .stop {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  border: 2px solid var(--rule-strong);
+  background: var(--paper);
+  flex: none;
+}
+.stage-tracker .stop.done { border-color: var(--status-complete); background: var(--status-complete); }
+.stage-tracker .stop.current { border-color: var(--status-progress); background: var(--status-progress); }
+.stage-labels {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  margin-top: 0.35rem;
+}
+
+/* ---- Tables — ruled ledger, tabular numerals, no cards ---- */
+table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+th, td { text-align: left; padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 600; color: var(--ink-muted); font-size: 0.82rem; border-bottom: 1px solid var(--rule-strong); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tbody tr:hover { background: var(--paper-raised); }
+
+.rule { border: none; border-top: 1px solid var(--rule); margin-block: 2rem; }

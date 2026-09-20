@@ -1,0 +1,64 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="About the data">
+  <h1>About this data</h1>
+
+  <p>
+    This site compiles publicly available information about infrastructure projects in
+    Bengaluru from government budget documents, agency reports, audit reports and
+    published news coverage. Every figure is shown with its source and the date it was
+    recorded.
+  </p>
+
+  <p>
+    Figures are drawn from official documents and media reports as published. They are
+    not independently audited by us. Budget allocations, sanctioned amounts, funds
+    released and actual expenditure are different things, and we label which is which. An
+    allocation is not evidence that money was spent, and a delay is not evidence of
+    wrongdoing.
+  </p>
+
+  <p>
+    Project timelines change. Information is accurate as of the "verified on" date shown
+    for each project and may be outdated. We update this site quarterly.
+  </p>
+
+  <p>
+    We do not allege misconduct by any individual, official, department or contractor.
+    Infrastructure delays have many causes, including land acquisition, litigation,
+    clearances, funding, contractor capacity and design changes.
+  </p>
+
+  <p>
+    If you are an agency or individual and believe something here is inaccurate, write to
+    [email]. We will review it against our sources and publish a correction where
+    warranted. Corrections are logged publicly — see the <a href="/corrections">corrections log</a>.
+  </p>
+
+  <h2>How we source and rank confidence</h2>
+  <p>Every record carries a confidence level, shown wherever the figure appears:</p>
+  <ul>
+    <li><strong>High</strong> — official document (budget document, audit report, Assembly reply, RTI response).</li>
+    <li><strong>Medium</strong> — reported in credible media, or an agency's own report.</li>
+    <li><strong>Low</strong> — announcement only, unverified against a document.</li>
+  </ul>
+
+  <h2>Update cadence</h2>
+  <p>
+    Updated quarterly, aligned to when the underlying data actually moves: the Karnataka
+    budget lands in April, agency annual reports follow, and Assembly sessions produce
+    question replies in batches. Suggested sweep windows: April, July, October, January.
+    Out-of-cycle corrections are always allowed for factual changes — the quarterly cycle
+    governs the systematic re-verification sweep, not the ability to fix something. A
+    record not touched for two cycles is flagged in the UI as possibly outdated.
+  </p>
+
+  <h2>Explicitly out of scope</h2>
+  <ul>
+    <li>Allegations of corruption, or any claim about <em>why</em> a delay happened.</li>
+    <li>Contractor performance rankings.</li>
+    <li>Anything sourced only from social media or unattributed claims.</li>
+  </ul>
+</Base>

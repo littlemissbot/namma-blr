@@ -1,0 +1,18 @@
+{
+  "id": "metro-phase-3",
+  "name": "Namma Metro Phase 3",
+  "aka": ["Orange Line", "Grey Line"],
+  "agency": "BMRCL",
+  "category": "metro_rail",
+  "scope": "44.65 km, 31 stations, two corridors: JP Nagar 4th Phase–Kempapura (Orange Line, Outer Ring Road west, 28.486 km double-decker viaduct) and Hosahalli–Kadabagere (Grey Line, Magadi Road, 8.635 km double-decker viaduct)",
+  "status": "tendering",
+  "sanction_date": "2024-08-16",
+  "original_deadline": "2030-05-01",
+  "current_deadline": "2031-05-01",
+  "pending": "Civil work tenders for the double-decker viaduct design delayed. Land acquisition, utility shifting and tree clearance still pending — of 6,72,117 sqm required, BMRCL has yet to take full possession, per Deccan Herald.",
+  "wards": [],
+  "corporation": "West",
+  "confidence": "medium",
+  "verified_on": "2026-09-19",
+  "notes": "original_deadline is inferred (\"a year later than originally planned\" relative to the confirmed 2031-05-01 current deadline) and not independently confirmed against a primary schedule document. The ₹16,300 cr revised-cost figure and its as_of date are approximate — reported as \"over ₹16,300 crore, up 5%\" without an exact figure or a confirmed publication date."
+}

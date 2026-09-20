@@ -1,0 +1,156 @@
+---
+import "@fontsource/zilla-slab/500.css";
+import "@fontsource/zilla-slab/600.css";
+import "@fontsource/zilla-slab/700.css";
+import "@fontsource/ibm-plex-sans/400.css";
+import "@fontsource/ibm-plex-sans/400-italic.css";
+import "@fontsource/ibm-plex-sans/500.css";
+import "@fontsource/ibm-plex-sans/600.css";
+import "../styles/global.css";
+import { nextUpdateDue } from "../lib/data";
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+const nextDue = nextUpdateDue();
+const nextDueLabel = nextDue.toLocaleDateString("en-IN", { year: "numeric", month: "long" });
+const path = new URL(Astro.request.url).pathname;
+const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} · NammaBLR</title>
+    <style>
+      /* ---- Header: a row of filed tabs, not a nav bar ---- */
+      .site-header {
+        border-bottom: 1px solid var(--rule-strong);
+        background: var(--paper);
+      }
+      .site-header .wrap {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem 1.5rem;
+        padding-block: 1rem;
+      }
+      .wordmark {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 1.15rem;
+        color: var(--ink);
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .wordmark span { color: var(--accent); }
+      .site-nav {
+        display: flex;
+        gap: 0.25rem;
+        font-size: 0.9rem;
+      }
+      .site-nav a {
+        color: var(--ink-muted);
+        text-decoration: none;
+        padding: 0.45rem 0.9rem;
+        border: 1px solid transparent;
+        border-radius: var(--radius-pill);
+      }
+      .site-nav a:hover { color: var(--ink); }
+      .site-nav a[aria-current="page"] {
+        color: var(--ink);
+        font-weight: 600;
+        border-color: var(--rule-strong);
+        background: var(--card-bg);
+        box-shadow: var(--card-shadow);
+      }
+      .cadence-strip {
+        border-bottom: 1px solid var(--rule);
+        font-size: 0.82rem;
+        color: var(--ink-muted);
+        background: var(--paper-raised);
+      }
+      .cadence-strip { overflow: hidden; }
+      .ticker {
+        overflow: hidden;
+        white-space: nowrap;
+        padding-block: 0.4rem;
+        mask-image: linear-gradient(to right, transparent, black 2rem, black calc(100% - 2rem), transparent);
+      }
+      .ticker-track {
+        display: inline-block;
+      }
+      .ticker-item {
+        display: inline-block;
+        animation: ticker-scroll 32s linear infinite;
+      }
+      .cadence-strip:hover .ticker-item,
+      .cadence-strip:focus-within .ticker-item {
+        animation-play-state: paused;
+      }
+      /* Starts a full viewport-width beyond the right edge (100vw) and ends a
+         full element-width beyond the left edge (-100%, relative to its own
+         box) — both endpoints are off-screen, so the loop point is invisible
+         and the text always visibly enters from the right. */
+      @keyframes ticker-scroll {
+        from { transform: translateX(100vw); }
+        to { transform: translateX(-100%); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .ticker-item { animation: none; }
+        .ticker { mask-image: none; }
+      }
+
+      main { display: block; padding-block: 2.5rem 4rem; }
+
+      /* ---- Footer ---- */
+      .site-footer {
+        border-top: 1px solid var(--rule-strong);
+        font-size: 0.85rem;
+        color: var(--ink-muted);
+        padding-block: 1.5rem 2.5rem;
+      }
+      .site-footer p { max-width: none; }
+      .site-footer a { color: var(--ink-muted); text-decoration: underline; }
+    </style>
+  </head>
+  <body>
+    <div class="cadence-strip" hidden>
+      <div class="ticker">
+        <div class="ticker-track">
+          <span class="ticker-item">Updated quarterly. Next sweep due {nextDueLabel}.</span>
+        </div>
+      </div>
+    </div>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="wordmark" href="/">Namma<span>BLR</span></a>
+        <nav class="site-nav">
+          <a href="/projects" aria-current={isActive("/projects") ? "page" : undefined}>Projects</a>
+          <a href="/about-the-data" aria-current={isActive("/about-the-data") ? "page" : undefined}>About the data</a>
+          <a href="/corrections" aria-current={isActive("/corrections") ? "page" : undefined}>Corrections</a>
+        </nav>
+      </div>
+    </header>
+    <main class="wrap">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="wrap">
+        <p>
+          This site compiles publicly available information about infrastructure projects in
+          Bengaluru. Every figure is shown with its source and the date it was recorded. An
+          allocation is not evidence that money was spent, and a delay is not evidence of
+          wrongdoing. We do not allege misconduct by any individual, official, department or
+          contractor. <a href="/about-the-data">Full disclaimer and sourcing</a> ·
+          <a href="/corrections">Corrections log</a>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

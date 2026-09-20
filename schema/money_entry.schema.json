@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://namma-bengaluru/schema/money_entry.schema.json",
+  "title": "money_entry",
+  "description": "Spec §3.2. One row per figure; a project has many. P1/P2: every figure carries its source, as_of date and kind.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["project_id", "fiscal_year", "kind", "amount_cr", "funder", "source_id", "as_of"],
+  "properties": {
+    "project_id": { "type": "string", "description": "FK to project.id" },
+    "fiscal_year": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}$", "description": "e.g. 2025-26" },
+    "kind": {
+      "enum": ["announced", "sanctioned", "revised_cost", "bid_received", "released", "utilised"]
+    },
+    "amount_cr": { "type": "number", "description": "₹ crore" },
+    "funder": {
+      "enum": ["state", "centre", "agency_borrowing", "external", "private"]
+    },
+    "funder_detail": {
+      "type": "string",
+      "description": "When funder is external: JICA, World Bank, HUDCO, etc."
+    },
+    "source_id": { "type": "string", "description": "FK to source.id" },
+    "as_of": { "type": "string", "format": "date", "description": "When the figure was true" },
+    "comparable_to_prior": {
+      "type": "boolean",
+      "description": "False where the definition changed (P3)",
+      "default": true
+    }
+  }
+}

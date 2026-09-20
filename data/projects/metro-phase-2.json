@@ -1,0 +1,14 @@
+{
+  "id": "metro-phase-2",
+  "name": "Namma Metro Phase 2",
+  "aka": ["Bangalore Metro Phase 2"],
+  "agency": "BMRCL",
+  "category": "metro_rail",
+  "scope": "72.09 km across the Yellow Line, Pink Line, Blue Line extensions (2A/2B) and Purple/Green Line extensions",
+  "status": "partially_open",
+  "wards": [],
+  "corporation": "Central",
+  "confidence": "medium",
+  "verified_on": "2026-09-19",
+  "notes": "Corporation set to Central as a placeholder — Phase 2 corridors actually span Central/North/South/East/West; not yet mapped to individual wards or corporations. Cost history: sanctioned ₹26,405.14 cr (2014, exact date not confirmed) → revised to ₹30,695.12 cr (date not confirmed) → cabinet-approved hike of ₹9,729.90 cr reported in 2024 media coverage, taking the estimate to ₹40,425 cr (exact cabinet decision date not confirmed). A separate outlet reported the revised estimate as ₹40,614 cr as of 2025-05-26 — a ₹189 cr gap from the ₹40,425 cr figure that almost exactly matches a technical committee's ₹189.25 cr trim (constituted 2025-02-06, reporting 2025-04-29) for excluding platform screen doors from the proposal. This suggests ₹40,614 cr was the pre-trim figure and ₹40,425 cr the post-trim one, but that sequencing is inferred, not independently confirmed — both figures are kept on file rather than one overwriting the other. The intermediate ₹30,695.12 cr revision is only partially sourced and needs a dedicated citation. Individual corridor status/cost is tracked separately: see yellow-line, pink-line, blue-line-phase-2a, blue-line-phase-2b, purple-line-ext-mysore-road, purple-line-ext-whitefield."
+}

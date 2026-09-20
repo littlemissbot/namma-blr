@@ -1,0 +1,15 @@
+{
+  "id": "hebbal-nagawara-lake-restoration",
+  "name": "Hebbal and Nagawara Lake Restoration",
+  "aka": ["Hebbal Lake wetland redevelopment"],
+  "agency": "GBA",
+  "category": "drains_lakes",
+  "scope": "Wetland creation, desilting, new inlets/outlets, walking tracks and water-flow correction across Hebbal and Nagawara lakes; over 21 acres of encroached land reclaimed (10+ acres at Hebbal, roughly 11 acres at Nagawara)",
+  "status": "under_construction",
+  "pending": "Cost and a specific completion date not confirmed from a primary or directly-verified source (see notes on funding ambiguity).",
+  "wards": [],
+  "corporation": "North",
+  "confidence": "medium",
+  "verified_on": "2026-09-20",
+  "notes": "First GBA-attributed and first drains_lakes record on this site. Corporation set to North as a placeholder (Hebbal/Nagawara are North Bengaluru) — not yet mapped to wards. Funding is unresolved: this project's source (Oneindia, 2026-05-15) describes the Hebbal component as \"part of a larger World Bank-assisted lake restoration programme\" (which would make it externally funded), while separate, unverified reporting attributes a ₹20 cr figure to the National Disaster Mitigation Fund (a central government fund) for what may be the same or a related work package. Rather than pick one framing, no money_entry is recorded for this project yet — this is flagged as a priority for the next quarterly sweep."
+}

@@ -1,0 +1,57 @@
+---
+import Base from "../layouts/Base.astro";
+import { getCorrections, getProject, getSource } from "../lib/data";
+
+const corrections = [...getCorrections()].sort((a, b) => b.date.localeCompare(a.date));
+---
+
+<Base title="Corrections">
+  <h1>Corrections log</h1>
+  <p>
+    Public, dated and permanent. Each entry records what was wrong, what it now says, who
+    raised it, and which source resolved it.
+  </p>
+
+  {
+    corrections.length === 0 ? (
+      <>
+        <p>
+          No corrections have been logged yet — this site has not published a figure that
+          later turned out to be wrong. That will change; when it does, the entry goes here,
+          dated and permanent, not quietly edited away.
+        </p>
+        <h2>Found something wrong?</h2>
+        <p>
+          If you are an agency or an individual and believe a figure, date or status on this
+          site is inaccurate, write to [email] with the project name and what you believe is
+          correct. We review every report against our sources and publish a correction where
+          warranted — see <a href="/about-the-data">how we source and rank confidence</a>.
+          We do not need to agree publicly that a delay was anyone's fault to agree that a
+          number was wrong; corrections here are about facts, not blame.
+        </p>
+      </>
+    ) : (
+      <ul>
+        {corrections.map((c) => {
+          const project = getProject(c.project_id);
+          const source = getSource(c.resolved_by_source_id);
+          return (
+            <li>
+              <strong>{c.date}</strong>
+              {project && <> — <a href={`/projects/${project.id}`}>{project.name}</a></>}
+              <br />
+              Was: "{c.was}" → Now: "{c.now}"
+              <br />
+              Raised by {c.raised_by}
+              {source && (
+                <>
+                  , resolved via <a href={source.url} target="_blank" rel="noopener">{source.title}</a>
+                </>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    )
+  }
+</Base>

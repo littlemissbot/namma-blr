@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://namma-bengaluru/schema/source.schema.json",
+  "title": "source",
+  "description": "Spec §3.4/§4. doc_type drives confidence: budget_document, audit_report, assembly_reply, rti_response -> high; agency_report -> high or medium; news -> medium; press_release alone -> low.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "publisher", "doc_type", "url", "retrieved_on"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^S[0-9]+$", "description": "S1, S2, ..." },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "doc_type": {
+      "enum": [
+        "budget_document",
+        "audit_report",
+        "agency_report",
+        "assembly_reply",
+        "rti_response",
+        "news",
+        "press_release"
+      ]
+    },
+    "url": { "type": "string", "format": "uri" },
+    "page_ref": { "type": "string", "description": "Page or section, for PDFs" },
+    "published_on": { "type": ["string", "null"], "format": "date" },
+    "retrieved_on": { "type": "string", "format": "date" },
+    "archive_url": {
+      "type": ["string", "null"],
+      "format": "uri",
+      "description": "Wayback snapshot — essential, government URLs rot"
+    }
+  }
+}

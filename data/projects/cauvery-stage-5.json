@@ -1,0 +1,16 @@
+{
+  "id": "cauvery-stage-5",
+  "name": "Cauvery Water Supply Scheme Stage 5",
+  "aka": ["Cauvery Stage V", "CWSS Stage 5", "Bengaluru Water Supply and Sewerage Project (Phase 3)"],
+  "agency": "BWSSB",
+  "category": "water_sewerage",
+  "scope": "775 MLD water supply capacity (500 MLD Phase 1 + 275 MLD Phase 2), extending Cauvery water and sewerage service to 110 villages added to BBMP limits; JICA calls this the Bengaluru Water Supply and Sewerage Project (Phase 3)",
+  "status": "partially_open",
+  "sanction_date": "2018-01-24",
+  "pending": "As of the sources collected, 6 of 110 villages still lack water access — land acquisition disputes have blocked reservoir construction at the Kadugodi and Chokkanahalli sites (Citizen Matters, 2025-04-07). Separately, secondary and tertiary distribution has lagged bulk supply: reported connection uptake was under 1.2 lakh against a roughly 4 lakh target 18 months after commissioning (Deccan Herald, 2026-03-21) — residents reportedly prefer existing borewells over new tap connections.",
+  "wards": [],
+  "corporation": "North",
+  "confidence": "medium",
+  "verified_on": "2026-09-20",
+  "notes": "First BWSSB / water_sewerage record on this site — added to broaden coverage beyond BMRCL metro projects. Corporation set to North as a placeholder based on the named pending villages (Kadugodi, Byrathi, Chokkanahalli, Kattigenahalli etc. are North/East Bengaluru periphery); not yet mapped to wards or corporations precisely. Citizen Matters' own text names 8 villages as still without supply but its summary states \"6 villages\" — this discrepancy in the source itself is unresolved in this collection pass, not corrected here.\n\nCost correction (2026-09-20): an earlier version of this record used a citizenmatters.in-sourced ₹4,336 cr figure without distinguishing it from the project's total cost. Verified directly against JICA's own ex-ante evaluation PDF: ₹4,336 cr (JPY 81,060 million) is specifically JICA's Phase 3(I) LOAN amount, not BWSSB's total project cost — JICA's document separately states a wider Phase 3(I) cost estimate of JPY 153,837 million (not independently converted to INR here), and unverified news reporting elsewhere cites a ₹5,500–5,550 cr total project cost that this site has not confirmed against a primary document and so does not record as a figure. A second, separate JICA loan of ₹2,391 cr (Phase 3(II), signed 2022-03-31) is also on file — the two loans are not directly comparable to each other or summable into one \"total\" without a primary document reconciling them.\n\nSchedule nuance: JICA's ex-ante evaluation sets a target of facilities being \"placed in service\" by November 2024, against a full loan schedule of January 2018–February 2026. The actual inauguration on 2024-10-16 was close to on-time against JICA's own November 2024 milestone — the widely reported \"missed deadlines\" (July 2023, December 2023, May 2024, July 2024) were BWSSB's own, more optimistic, publicly announced targets, not JICA's original schedule. original_deadline/current_deadline are left blank here rather than picking one of these differing target dates as \"the\" deadline."
+}

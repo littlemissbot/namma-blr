@@ -1,0 +1,16 @@
+{
+  "id": "blue-line-phase-2a",
+  "name": "Blue Line Phase 2A",
+  "aka": ["Airport Line Phase 2A"],
+  "agency": "BMRCL",
+  "category": "metro_rail",
+  "scope": "19.75 km, Central Silk Board to Krishnarajapura (KR Puram); part of Namma Metro Phase 2's Blue (Airport) Line. Construction began 2021-08.",
+  "status": "under_construction",
+  "current_deadline": "2027-03-01",
+  "pending": "As of 2025-06-30, physical progress on the combined Phase 2A+2B corridor was 52.5%, financial progress 55.89% (PropNewz). Expected operational around March 2027, alongside Pink Line's second section, per The Metro Rail Guy.",
+  "wards": [],
+  "corporation": "North",
+  "confidence": "medium",
+  "verified_on": "2026-09-20",
+  "notes": "One money_entry here (₹14,788.101 cr) is the COMBINED cost for Phase 2A + 2B (58.19 km total), not this project's own 19.75 km alone — no source found apportions the figure between the two phases, so it is deliberately not split by estimate; it is flagged comparable_to_prior: false and excluded from this site's own derived \"latest cost\" figure for exactly that reason. To avoid double-counting in aggregate totals, the same combined figure is not repeated on blue-line-phase-2b; see that project's notes. Funding breakdown reported for the combined total: ADB ₹2,410.79 cr, JICA ₹1,310.74 cr, PPP ₹800 cr, Karnataka State ₹4,074.34 cr, Centre ₹1,260.54 cr — these five figures sum to about ₹9,856 cr, roughly ₹4,932 cr short of the ₹14,788.101 cr headline total; this gap is unresolved and flagged rather than corrected.\n\nTwo package-level civil-works contracts are also on file (₹785.24 cr to Afcons, ₹623.55 cr to Shankaranarayana, both awarded 2021-05-25) — these are separate contracts for separate stretches of this phase, not additive into one project cost and not a substitute for the combined total above."
+}

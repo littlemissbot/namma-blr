@@ -1,0 +1,15 @@
+{
+  "id": "metro-phase-3a",
+  "name": "Namma Metro Phase 3A (Hebbal – Sarjapur)",
+  "aka": ["Hebbal–Sarjapur Line"],
+  "agency": "BMRCL",
+  "category": "metro_rail",
+  "scope": "36.59 km connecting Hebbal in the north to Sarjapur in the southeast, via the Central Business District",
+  "status": "sanctioned",
+  "sanction_date": "2024-12-01",
+  "wards": [],
+  "corporation": "North",
+  "confidence": "medium",
+  "verified_on": "2026-09-19",
+  "notes": "sanction_date precision is month-level only — cabinet approval reported as \"December 2024\" without a specific day. Corporation set to North (Hebbal) as a placeholder; the line also runs through Central and East (Sarjapur) corporations — not yet mapped to wards."
+}

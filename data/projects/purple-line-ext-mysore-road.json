@@ -1,0 +1,14 @@
+{
+  "id": "purple-line-ext-mysore-road",
+  "name": "Purple Line extension: Mysuru Road – Challaghatta",
+  "aka": ["Purple Line Kengeri extension"],
+  "agency": "BMRCL",
+  "category": "metro_rail",
+  "scope": "8.81 km western extension of the Purple Line, part of Namma Metro Phase 2",
+  "status": "complete",
+  "wards": [],
+  "corporation": "West",
+  "confidence": "medium",
+  "verified_on": "2026-09-20",
+  "notes": "Opened in two sections: Mysuru Road–Kengeri (2021-08) and Kengeri–Challaghatta (2023-10), per The Metro Rail Guy. A separately-reported ₹1,867.95 cr figure (Deccan Herald) could not be directly verified in this collection pass and remains withheld. The two civil-works contract values now on file (₹327 cr + ₹332 cr = ₹659 cr, confirmed directly from a Metro Rail News article dated 2021-06-28) are package-level construction contracts, not a confirmed total project cost — the ₹1,867.95 cr figure may cover land acquisition, systems and other components on top of these two packages, but that has not been confirmed."
+}

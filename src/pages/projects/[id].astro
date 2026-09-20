@@ -1,0 +1,335 @@
+---
+import Base from "../../layouts/Base.astro";
+import StageTracker from "../../components/StageTracker.astro";
+import {
+  getProjects,
+  getMoneyEntries,
+  getEvents,
+  getSource,
+  getCorrections,
+  isStale,
+  latestCost,
+  originalSanctionedCost,
+  slippageMonths,
+  agencyLabel,
+} from "../../lib/data";
+
+export function getStaticPaths() {
+  return getProjects().map((project) => ({ params: { id: project.id }, props: { project } }));
+}
+
+const { project } = Astro.props;
+const money = getMoneyEntries(project.id);
+const events = getEvents(project.id);
+const corrections = getCorrections().filter((c) => c.project_id === project.id);
+const sourceIds = [...new Set([...money.map((m) => m.source_id), ...events.map((e) => e.source_id)])];
+const sources = sourceIds.map((id, i) => ({ n: i + 1, source: getSource(id) })).filter((s) => s.source);
+const sourceRef = (id: string) => sources.find((s) => s.source!.id === id)?.n;
+const stale = isStale(project);
+const cr = (n: number) => `₹${n.toLocaleString("en-IN")} cr`;
+
+const related = getProjects()
+  .filter((p) => p.id !== project.id && (p.agency === project.agency || p.category === project.category))
+  .slice(0, 4);
+
+const cost = latestCost(project.id);
+const sanctioned = originalSanctionedCost(project.id);
+const slippage = slippageMonths(project);
+---
+
+<Base title={project.name}>
+  <a href="/projects" class="pill-link back-link">← Back to project finder</a>
+
+  <div class="detail-layout">
+    <div class="detail-main">
+      <div class="card hero-card">
+        <div class="pill-row hero-pills">
+          <span class={`status-tab status-${project.status}`}>{project.status.replace(/_/g, " ")}</span>
+          <span class="confidence">{agencyLabel(project)}</span>
+          <span class="confidence">{project.category.replace(/_/g, " ")}</span>
+          <span class={`confidence confidence-${project.confidence}`}>{project.confidence}</span>
+        </div>
+
+        <h1>{project.name}</h1>
+        {project.aka && project.aka.length > 0 && (
+          <p class="aka">Also known as {project.aka.join(", ")}</p>
+        )}
+        <p class="scope-text">{project.scope}</p>
+
+        <div class="stat-grid hero-stats">
+          <div class="stat-cell">
+            <div class="stat-label">Latest cost on record</div>
+            <div class="stat-value">{cost ? cr(cost.amount_cr) : "no data"}</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-label">Originally sanctioned</div>
+            <div class="stat-value">{sanctioned ? cr(sanctioned.amount_cr) : "no data"}</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-label">Sanctioned</div>
+            <div class="stat-value stat-date">{project.sanction_date ?? "no data"}</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-label">Last verified</div>
+            <div class="stat-value stat-date">{project.verified_on}{stale && " ⚠"}</div>
+          </div>
+        </div>
+
+        <StageTracker status={project.status} showLabels />
+      </div>
+
+      <div class="card schedule-card">
+        <p class="section-eyebrow">Schedule check</p>
+        <h2 class="no-margin-top">Deadline history</h2>
+        <div class="stat-grid">
+          <div class="stat-cell">
+            <div class="stat-label">Original deadline</div>
+            <div class="stat-value stat-date">{project.original_deadline ?? "no data"}</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-label">Current deadline</div>
+            <div class="stat-value stat-date">{project.current_deadline ?? "no data"}</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-label">Slippage</div>
+            <div class="stat-value">{slippage === null ? "no data" : `${slippage} mo`}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="no-margin-top">Money timeline</h2>
+        {
+          money.length === 0 ? (
+            <p><em>Released: no data.</em> No money entries recorded yet for this project.</p>
+          ) : (
+            <div style="overflow-x: auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Kind</th>
+                    <th>FY</th>
+                    <th class="num">Amount</th>
+                    <th>Funder</th>
+                    <th>As of</th>
+                    <th>Source</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {money.map((m) => (
+                    <tr>
+                      <td>{m.kind.replace(/_/g, " ")}{m.comparable_to_prior === false && " *"}</td>
+                      <td>{m.fiscal_year}</td>
+                      <td class="num">{cr(m.amount_cr)}</td>
+                      <td>{m.funder}{m.funder_detail ? ` — ${m.funder_detail}` : ""}</td>
+                      <td>{m.as_of}</td>
+                      <td><a href={`#source-${sourceRef(m.source_id)}`}>[{sourceRef(m.source_id)}]</a></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        }
+        {money.some((m) => m.comparable_to_prior === false) && (
+          <p style="font-size: 0.85rem; color: var(--ink-muted);">* Not comparable to the prior figure — a different scope or definition, not a straight revision.</p>
+        )}
+      </div>
+
+      <div class="card">
+        <h2 class="no-margin-top">What's pending</h2>
+        <p>{project.pending || "No blocking factor recorded."}</p>
+      </div>
+
+      {
+        events.length > 0 && (
+          <div class="card">
+            <h2 class="no-margin-top">Timeline</h2>
+            <ul class="timeline">
+              {events.map((e) => (
+                <li>
+                  <span class="timeline-date">{e.date}</span>
+                  {e.summary} <a href={`#source-${sourceRef(e.source_id)}`}>[{sourceRef(e.source_id)}]</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+
+      <div class="source-ledger">
+        <p class="source-ledger-title">Source ledger</p>
+        {
+          sources.length === 0 ? (
+            <p>No sources recorded yet.</p>
+          ) : (
+            <ol class="source-list">
+              {sources.map(({ n, source }) => (
+                <li id={`source-${n}`}>
+                  <span class="source-num">{String(n).padStart(2, "0")}</span>
+                  <div>
+                    <a href={source!.url} target="_blank" rel="noopener">{source!.title}</a>
+                    {source!.archive_url && <> (<a href={source!.archive_url} target="_blank" rel="noopener">archived copy</a>)</>}
+                    <div class="source-meta">{source!.publisher} · {source!.retrieved_on} · {source!.doc_type.replace(/_/g, " ")}</div>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )
+        }
+      </div>
+
+      {
+        corrections.length > 0 && (
+          <div class="card">
+            <h2 class="no-margin-top">Corrections to this record</h2>
+            <ul>
+              {corrections.map((c) => (
+                <li><strong>{c.date}</strong>: was "{c.was}" — now "{c.now}"</li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+
+      {project.notes && (
+        <div class="card">
+          <h2 class="no-margin-top">Notes</h2>
+          <p>{project.notes}</p>
+        </div>
+      )}
+    </div>
+
+    <aside class="detail-sidebar">
+      <div class="card">
+        <p class="section-eyebrow">Project profile</p>
+        <dl class="profile-list">
+          <div>
+            <dt>Agency</dt>
+            <dd>{agencyLabel(project)}</dd>
+          </div>
+          <div><dt>Category</dt><dd>{project.category.replace(/_/g, " ")}</dd></div>
+          {project.agency !== "corporation" && (
+            <div><dt>Corporation</dt><dd>{project.corporation.replace(/_/g, " ")}</dd></div>
+          )}
+          <div><dt>Confidence</dt><dd>{project.confidence}</dd></div>
+          <div><dt>Sources cited</dt><dd>{sources.length}</dd></div>
+        </dl>
+      </div>
+
+      {related.length > 0 && (
+        <div class="card">
+          <p class="section-eyebrow">Related projects</p>
+          <ul class="related-list">
+            {related.map((r) => (
+              <li>
+                <a href={`/projects/${r.id}`}>{r.name}</a>
+                <span class="related-meta">{agencyLabel(r)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </aside>
+  </div>
+</Base>
+
+<style>
+  .back-link { font-size: 0.9rem; margin-bottom: 1.25rem; display: inline-flex; }
+
+  .detail-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 18rem;
+    gap: 1.75rem;
+    align-items: start;
+  }
+  /* Grid items default to a content-based min-width that ignores the track
+     size — without this, a long word or a wide table can blow the whole
+     layout past the viewport regardless of the column width above. */
+  .detail-main, .detail-sidebar { min-width: 0; }
+  @media (max-width: 52rem) {
+    .detail-layout { grid-template-columns: 1fr; }
+  }
+
+  .detail-main .card,
+  .detail-main .source-ledger { margin-bottom: 1.25rem; }
+  .detail-sidebar { display: flex; flex-direction: column; gap: 1.25rem; }
+
+  .hero-pills { margin-bottom: 0.9rem; }
+  .hero-card h1 { margin-bottom: 0.25rem; }
+  .aka { color: var(--ink-muted); margin: 0 0 0.75rem; }
+  .scope-text { color: var(--ink-muted); margin-bottom: 1.25rem; }
+  .hero-stats { margin-bottom: 1.1rem; }
+  .stat-date { font-size: 1rem; }
+
+  .section-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 0 0 0.4rem;
+  }
+  .no-margin-top { margin-top: 0; }
+
+  .timeline { list-style: none; padding: 0; margin: 1rem 0 0; border-left: 2px solid var(--rule-strong); }
+  .timeline li { padding: 0 0 1rem 1rem; position: relative; }
+  .timeline li::before {
+    content: "";
+    position: absolute;
+    left: -5px;
+    top: 0.35rem;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ink-muted);
+  }
+  .timeline-date { font-weight: 600; display: block; font-size: 0.85rem; color: var(--ink-muted); }
+
+  /* Source ledger — a deliberately sharp-cornered, high-contrast box: the one
+     place on the page that looks like evidence filed in a case, not a card. */
+  .source-ledger {
+    border: 1.5px solid var(--ink);
+    padding: 1rem 1.25rem 1.25rem;
+  }
+  .source-ledger-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin: 0 0 0.75rem;
+  }
+  .source-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 0.9rem 1.5rem;
+  }
+  .source-list li { display: flex; gap: 0.6rem; font-size: 0.9rem; }
+  .source-num { font-family: var(--font-display); font-weight: 700; color: var(--rule-strong); flex: none; }
+  .source-meta { font-size: 0.78rem; color: var(--ink-muted); margin-top: 0.15rem; }
+
+  .profile-list { margin: 0; }
+  .profile-list > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 0.88rem;
+  }
+  .profile-list > div:last-child { border-bottom: none; }
+  .profile-list dt { color: var(--ink-muted); }
+  .profile-list dd { margin: 0; font-weight: 600; text-transform: capitalize; text-align: right; }
+
+  .related-list { list-style: none; padding: 0; margin: 0; }
+  .related-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+  }
+  .related-list li:last-child { border-bottom: none; }
+  .related-list a { font-size: 0.9rem; font-weight: 600; text-decoration: none; }
+  .related-list a:hover { text-decoration: underline; }
+  .related-meta { font-size: 0.76rem; color: var(--ink-muted); }
+</style>

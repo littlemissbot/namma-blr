@@ -1,0 +1,15 @@
+{
+  "id": "metro-corridor-kalena-kadugodi",
+  "name": "Kalena Agrahara – Kadugodi Tree Park corridor",
+  "aka": ["Namma Metro Phase 4 (proposed)"],
+  "agency": "BMRCL",
+  "category": "metro_rail",
+  "scope": "73 km proposed elevated corridor, over 50 stations, via Bannerghatta, Jigani and Sarjapur, with a 5 km spur to the international cricket stadium in Anekal taluk",
+  "status": "announced",
+  "pending": "Feasibility study complete; proposal awaiting government review before Detailed Project Report (DPR) preparation, which officials estimate could take about a year. Construction has not been sanctioned and no cost figure has been published; reported potential construction start around 2029.",
+  "wards": [],
+  "corporation": "South",
+  "confidence": "medium",
+  "verified_on": "2026-09-19",
+  "notes": "Corporation set to South (Kalena Agrahara end) as a placeholder — the proposed route also runs through East Bengaluru and Anekal taluk, which lies outside the GBA area. This is the earliest-stage project tracked on this site: no sanction, no money_entry, no dated event — only a reported feasibility-study milestone (Asianet Newsable, 2026-05-09), which does not fit any event type in this site's schema and so is not recorded as a formal event row."
+}

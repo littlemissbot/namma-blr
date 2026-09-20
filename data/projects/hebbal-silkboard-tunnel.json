@@ -1,0 +1,15 @@
+{
+  "id": "hebbal-silkboard-tunnel",
+  "name": "Hebbal–Silk Board Twin Tunnel Road",
+  "aka": ["Bengaluru tunnel road", "North-South tunnel corridor"],
+  "agency": "B-SMILE",
+  "category": "roads",
+  "scope": "16.74 km underground twin-tunnel road from Hebbal (Esteem Mall Junction) to Silk Board (KSRP Junction), with intermediate ramps at Mekri Circle, Race Course and Lalbagh; split into two construction packages",
+  "status": "tendering",
+  "pending": "Adani Group's lowest (L1) bid of ₹22,267 crore came in about 24% over estimate for the first package and 28% over for the second (package-level cost split not disclosed in the source used here). Cabinet decision on whether to accept the bid remained pending as of 2026-08-26.",
+  "wards": [],
+  "corporation": "Central",
+  "confidence": "medium",
+  "verified_on": "2026-09-20",
+  "notes": "First B-SMILE (Bengaluru Smart Infrastructure Limited) record on this site — a special-purpose vehicle with jurisdiction over Bengaluru Urban district for large infrastructure (tunnel roads, flyovers, underpasses, stormwater-drain-buffer-zone roads), reportedly launched around 2025-05-05. This is also the exact bid-vs-estimate pairing the site's own build spec cites as a model of P5-compliant, fact-only reporting (\"lowest bid was ₹22,267 crore against an estimate of ₹17,698 crore\") — state the figures, no characterisation of why the gap exists. Corporation set to Central as a placeholder — the corridor runs from North Bengaluru (Hebbal) to South (Silk Board); not yet mapped to wards."
+}

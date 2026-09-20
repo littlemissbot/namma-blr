@@ -1,0 +1,14 @@
+{
+  "id": "yellow-line",
+  "name": "Yellow Line (RV Road – Bommasandra)",
+  "aka": ["Namma Metro Phase 2 Yellow Line"],
+  "agency": "BMRCL",
+  "category": "metro_rail",
+  "scope": "19.14 km, 16 stations, part of Namma Metro Phase 2",
+  "status": "complete",
+  "wards": [],
+  "corporation": "South",
+  "confidence": "medium",
+  "verified_on": "2026-09-19",
+  "notes": "Inaugurated by the Prime Minister 2025-08-10; commercial operations began 2025-08-11 with 3 driverless trains at 25-minute frequency, expected to increase to 20 minutes as more trains are added."
+}

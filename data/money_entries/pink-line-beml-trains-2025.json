@@ -1,0 +1,11 @@
+{
+  "project_id": "pink-line",
+  "fiscal_year": "2024-25",
+  "kind": "sanctioned",
+  "amount_cr": 405,
+  "funder": "state",
+  "funder_detail": "BEML variation order for 7 additional six-coach driverless trainsets specifically for the Pink Line (part of a larger, separate 53-trainset/₹3,177 cr system-wide BEML contract awarded 2023-08-07, which is not recorded here since it is not Pink-Line-specific)",
+  "source_id": "S27",
+  "as_of": "2025-03-01",
+  "comparable_to_prior": false
+}

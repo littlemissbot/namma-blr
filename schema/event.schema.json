@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://namma-bengaluru/schema/event.schema.json",
+  "title": "event",
+  "description": "Spec §3.3. One row per dated development. Drives the timeline and the \"what changed\" feed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["project_id", "date", "type", "summary", "source_id"],
+  "properties": {
+    "project_id": { "type": "string", "description": "FK to project.id" },
+    "date": { "type": "string", "format": "date" },
+    "type": {
+      "enum": [
+        "sanctioned",
+        "tender_floated",
+        "bid_received",
+        "awarded",
+        "deadline_revised",
+        "section_opened",
+        "cost_revised",
+        "stalled"
+      ]
+    },
+    "summary": {
+      "type": "string",
+      "description": "Factual, one sentence, no characterisation (P5)"
+    },
+    "source_id": { "type": "string", "description": "FK to source.id" }
+  }
+}

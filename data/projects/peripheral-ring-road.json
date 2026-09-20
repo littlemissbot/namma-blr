@@ -1,0 +1,15 @@
+{
+  "id": "peripheral-ring-road",
+  "name": "Bengaluru Business Corridor (Peripheral Ring Road)",
+  "aka": ["Peripheral Ring Road", "PRR"],
+  "agency": "BDA",
+  "category": "roads",
+  "scope": "73.5 km, 8-lane access-controlled expressway connecting NH44, NH75 and NH648 via Tumkur Road, Mysuru Road and Old Madras Road in an outer arc around the city; PPP-DBFOT model with a 50-year toll concession",
+  "status": "tendering",
+  "pending": "Package 1 (Tumkur Road–Bellary Road, 19.80 km, ~₹3,348 cr estimated) drew bids from two firms — Shankara Narayana Constructions and Vishwa Samudra Engineering — on 2026-05-08, but award finalisation was still pending as of 2026-08-26. This is BDA's third attempt at tendering the project: the first two rounds drew no response over unresolved farmer land-compensation terms. Underlying land acquisition has a long history of moving very slowly: a Supreme Court order of 2021-10-26 recorded that only 3 acres 21 guntas of the 1,810 acres 18.5 guntas notified for PRR Part 1 had actually been taken possession of at that point (0.19%), before the Court directed the state and BDA to proceed.",
+  "wards": [],
+  "corporation": "North",
+  "confidence": "medium",
+  "verified_on": "2026-09-20",
+  "notes": "First BDA / roads record on this site. Corporation set to North as a placeholder for Package 1's Tumkur Road–Bellary Road alignment — the full 73.5 km corridor rings the city and touches most corporations; not yet mapped to wards. Originally notified 2007, revived 2022, and rebranded from \"Peripheral Ring Road\" to \"Bengaluru Business Corridor\" in 2024–25 — no single clean sanction_date has been located across this history (the 2022-02-09 cabinet approval below is one well-documented milestone, not necessarily \"the\" sanction), so the field is left blank rather than picking one arbitrarily.\n\nCost history now on file: ₹21,091 cr (cabinet-approved 2022-02-09) → ₹27,000 cr (reported estimate, 2026) → a Deputy CM statement that it would fall to ₹17,000 cr (per an earlier, separately-recorded source) → June 2026 reporting still citing ~₹27,000 cr. These figures conflict and are not reconciled in any primary document found; each is kept on file with its own date rather than collapsed into one number."
+}

@@ -1,0 +1,371 @@
+---
+import Base from "../layouts/Base.astro";
+import StageTracker from "../components/StageTracker.astro";
+import {
+  getProjects,
+  latestCost,
+  originalSanctionedCost,
+  overrunPct,
+  isStale,
+  getProjectSourceIds,
+  sourcingHealth,
+  agencyLabel,
+} from "../lib/data";
+
+const projects = getProjects();
+
+const totals = projects.reduce(
+  (acc, p) => {
+    const sanctioned = originalSanctionedCost(p.id);
+    const latest = latestCost(p.id);
+    if (sanctioned) acc.sanctioned += sanctioned.amount_cr;
+    if (latest) acc.latest += latest.amount_cr;
+    return acc;
+  },
+  { sanctioned: 0, latest: 0 }
+);
+const overrun = totals.sanctioned > 0 ? totals.latest - totals.sanctioned : null;
+const staleCount = projects.filter((p) => isStale(p)).length;
+const health = sourcingHealth();
+
+const cr = (n: number) => `₹${Math.round(n).toLocaleString("en-IN")} cr`;
+
+// Notable finding: the single largest cost movement on record, stated as a fact,
+// not a characterisation (P5) — this is the one place the site foregrounds a
+// single number, so it should be the most defensible one, not the most dramatic.
+const biggestMover = projects
+  .map((p) => ({ project: p, pct: overrunPct(p.id) }))
+  .filter((x): x is { project: (typeof projects)[number]; pct: number } => x.pct !== null && x.pct > 0)
+  .sort((a, b) => b.pct - a.pct)[0];
+
+const uniqueSorted = (values: string[]) => [...new Set(values)].sort();
+const categories = uniqueSorted(projects.map((p) => p.category));
+const statuses = uniqueSorted(projects.map((p) => p.status));
+const label = (s: string) => s.replace(/_/g, " ");
+---
+
+<Base title="Home">
+  <section>
+    <h1>What Bengaluru was actually promised</h1>
+    <p style="color: var(--ink-muted); font-size: 1.1rem;">
+      A public ledger of what Karnataka's agencies have committed to build in
+      Bengaluru — what each project cost, how far behind it is, and what is
+      still pending. Every figure here carries its own source and date.
+    </p>
+  </section>
+
+  {
+    projects.length === 0 ? (
+      <p>
+        <strong>No project data has been published yet.</strong> This site is in
+        Phase 1 build-out (metro-only). See <a href="/about-the-data">how this
+        site sources its data</a>.
+      </p>
+    ) : (
+      <>
+        {biggestMover && (
+          <div class="finding-banner" id="finding-banner">
+            <p>
+              <strong>Notable:</strong>{" "}
+              <a href={`/projects/${biggestMover.project.id}`}>{biggestMover.project.name}</a>'s
+              latest cost on record is {biggestMover.pct.toFixed(1)}% above its original sanctioned
+              figure.
+            </p>
+            <button type="button" id="finding-dismiss" aria-label="Dismiss">×</button>
+          </div>
+        )}
+
+        <dl class="ledger-strip card" aria-label="Tracked totals">
+          <div class="ledger-cell">
+            <dt>Projects tracked</dt>
+            <dd>{projects.length}</dd>
+          </div>
+          <div class="ledger-cell">
+            <dt>Originally sanctioned</dt>
+            <dd>{totals.sanctioned > 0 ? cr(totals.sanctioned) : "no data"}</dd>
+          </div>
+          <div class="ledger-cell">
+            <dt>Latest cost on record</dt>
+            <dd>{totals.latest > 0 ? cr(totals.latest) : "no data"}</dd>
+          </div>
+          <div class="ledger-cell">
+            <dt>Movement since sanction</dt>
+            <dd>{overrun === null ? "no data" : `+${cr(overrun)}`}</dd>
+          </div>
+          <div class="ledger-cell">
+            <dt>Flagged possibly outdated</dt>
+            <dd>{staleCount}</dd>
+          </div>
+        </dl>
+        <p style="font-size: 0.85rem; color: var(--ink-muted);">
+          Totals cover only projects with a sanctioned figure and a later figure on record —
+          <a href="/about-the-data">confidence and sourcing gaps are shown per project</a>, not smoothed over here.
+        </p>
+
+        <details class="sourcing-health">
+          <summary>How well-sourced is this tracker right now?</summary>
+          <div class="sourcing-health-body">
+            <p>
+              <strong>{health.totalSources}</strong> sources back <strong>{health.totalProjects}</strong> projects.
+              No project is <code>high</code> confidence yet — every record here is sourced from news
+              reporting, not yet from a budget document, audit report or Assembly reply (see
+              <a href="/about-the-data">how confidence is ranked</a>).
+            </p>
+            <dl class="fields">
+              <dt>High confidence</dt><dd>{health.byConfidence.high} of {health.totalProjects}</dd>
+              <dt>Medium confidence</dt><dd>{health.byConfidence.medium} of {health.totalProjects}</dd>
+              <dt>Low confidence</dt><dd>{health.byConfidence.low} of {health.totalProjects}</dd>
+              <dt>No cost figure on record</dt><dd>{health.noMoneyData} of {health.totalProjects}</dd>
+              <dt>Possibly outdated</dt><dd>{health.stale} of {health.totalProjects}</dd>
+            </dl>
+          </div>
+        </details>
+
+        <hr class="rule" />
+
+        <div class="case-files-header">
+          <h2 class="no-margin">Case files</h2>
+          <div class="case-filter-bar">
+            <label>
+              <span>Category</span>
+              <select id="cf-category">
+                <option value="">All</option>
+                {categories.map((c) => <option value={c}>{label(c)}</option>)}
+              </select>
+            </label>
+            <label>
+              <span>Status</span>
+              <select id="cf-status">
+                <option value="">All</option>
+                {statuses.map((s) => <option value={s}>{label(s)}</option>)}
+              </select>
+            </label>
+            <button type="button" id="cf-reset" class="btn">Reset</button>
+          </div>
+        </div>
+        <p id="cf-count" class="filter-count" aria-live="polite">Showing all {projects.length} projects.</p>
+        <div class="case-grid" id="case-grid">
+          {projects.map((p) => {
+            const cost = latestCost(p.id);
+            const sourceCount = getProjectSourceIds(p.id).length;
+            return (
+              <a class="case-file card" href={`/projects/${p.id}`} data-category={p.category} data-status={p.status}>
+                <p class="case-file-category">{p.category.replace(/_/g, " ")}</p>
+                <h3>{p.name}</h3>
+                <p class="case-file-scope">{p.scope}</p>
+                <div class="pill-row case-file-pills">
+                  <span class={`status-tab status-${p.status}`}>{p.status.replace(/_/g, " ")}</span>
+                  <span class={`confidence confidence-${p.confidence}`}>{p.confidence}</span>
+                  <span class="confidence source-pill">{sourceCount} source{sourceCount === 1 ? "" : "s"}</span>
+                </div>
+                <div class="stat-grid case-file-stats">
+                  <div class="stat-cell">
+                    <div class="stat-label">Cost on record</div>
+                    <div class="stat-value">{cost ? cr(cost.amount_cr) : "no data"}</div>
+                  </div>
+                  <div class="stat-cell">
+                    <div class="stat-label">Agency</div>
+                    <div class="stat-value case-file-agency">{agencyLabel(p)}</div>
+                  </div>
+                </div>
+                <StageTracker status={p.status} />
+                <span class="pill-link case-file-cta">View project page →</span>
+              </a>
+            );
+          })}
+        </div>
+        <p id="cf-empty" class="filter-empty" hidden>No projects match these filters. <button type="button" id="cf-empty-reset">Clear filters</button></p>
+      </>
+    )
+  }
+</Base>
+
+<style>
+  .finding-banner[hidden] { display: none; }
+  .finding-banner {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding: 0.85rem 1.1rem;
+    border-radius: var(--radius);
+    border-left: 4px solid var(--accent);
+    background: var(--card-bg);
+    box-shadow: var(--card-shadow);
+  }
+  .finding-banner p { margin: 0; max-width: none; font-size: 0.92rem; }
+  .finding-banner button {
+    all: unset;
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+    color: var(--ink-muted);
+    padding: 0.1rem 0.3rem;
+    border-radius: var(--radius-pill);
+  }
+  .finding-banner button:hover { color: var(--ink); }
+  .finding-banner button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .sourcing-health {
+    margin-top: 1rem;
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    box-shadow: var(--card-shadow);
+    padding: 0.75rem 1.1rem;
+  }
+  .sourcing-health summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.92rem;
+  }
+  .sourcing-health-body { margin-top: 0.75rem; }
+  .sourcing-health-body p { font-size: 0.88rem; }
+  .sourcing-health-body code {
+    font-family: monospace;
+    background: var(--paper-raised);
+    padding: 0.05rem 0.3rem;
+    border-radius: 4px;
+  }
+  .sourcing-health-body .fields { max-width: 26rem; font-size: 0.88rem; }
+
+  .ledger-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 0.75rem;
+    margin: 1.75rem 0 0.5rem;
+  }
+  .ledger-cell {
+    padding: 0.8rem 1rem;
+    background: var(--paper-raised);
+    border-radius: var(--radius-sm);
+  }
+  .ledger-cell dt {
+    margin: 0 0 0.3rem;
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+  }
+  .ledger-cell dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.4rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .case-files-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    margin-top: 2rem;
+  }
+  .no-margin { margin: 0; }
+  .case-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 0.6rem;
+  }
+  .case-filter-bar label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+  }
+  .case-filter-bar select { min-width: 8.5rem; padding: 0.4rem 0.6rem; font-size: 0.85rem; }
+  .case-filter-bar .btn { padding: 0.4rem 0.8rem; font-size: 0.85rem; border-radius: var(--radius-pill); }
+
+  .case-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    gap: 1.1rem;
+    margin-top: 1.25rem;
+  }
+  .case-file[hidden] { display: none; }
+  .case-file {
+    display: block;
+    text-decoration: none;
+    color: var(--ink);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .case-file:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(60, 50, 20, 0.08), 0 14px 28px -14px rgba(60, 50, 20, 0.28);
+  }
+  .case-file-category {
+    margin: 0 0 0.3rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .case-file h3 { margin-bottom: 0.4rem; font-size: 1.05rem; }
+  .case-file-scope {
+    font-size: 0.82rem;
+    color: var(--ink-muted);
+    margin: 0 0 0.85rem;
+    max-width: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .case-file-pills { margin-bottom: 0.9rem; }
+  .source-pill { border-style: solid; }
+  .case-file-stats { margin-bottom: 0.9rem; }
+  .case-file-agency { font-size: 1rem; text-transform: capitalize; }
+  .case-file-cta { font-size: 0.85rem; }
+</style>
+
+<script>
+  const banner = document.getElementById("finding-banner");
+  const dismiss = document.getElementById("finding-dismiss");
+  if (banner && dismiss) {
+    if (sessionStorage.getItem("finding-dismissed") === "1") {
+      banner.hidden = true;
+    }
+    dismiss.addEventListener("click", () => {
+      banner.hidden = true;
+      sessionStorage.setItem("finding-dismissed", "1");
+    });
+  }
+
+  const grid = document.getElementById("case-grid");
+  if (grid) {
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>(".case-file"));
+    const total = cards.length;
+    const countEl = document.getElementById("cf-count")!;
+    const emptyEl = document.getElementById("cf-empty")!;
+    const categoryEl = document.getElementById("cf-category") as HTMLSelectElement;
+    const statusEl = document.getElementById("cf-status") as HTMLSelectElement;
+    const resetBtn = document.getElementById("cf-reset")!;
+    const emptyResetBtn = document.getElementById("cf-empty-reset")!;
+
+    function applyCaseFilters() {
+      const category = categoryEl.value;
+      const status = statusEl.value;
+      let visible = 0;
+      for (const card of cards) {
+        const matches = (!category || card.dataset.category === category) && (!status || card.dataset.status === status);
+        card.hidden = !matches;
+        if (matches) visible++;
+      }
+      countEl.hidden = visible === 0;
+      emptyEl.hidden = visible !== 0;
+      countEl.textContent = visible === total ? `Showing all ${total} projects.` : `Showing ${visible} of ${total} projects.`;
+    }
+
+    categoryEl.addEventListener("change", applyCaseFilters);
+    statusEl.addEventListener("change", applyCaseFilters);
+    function resetCaseFilters() {
+      categoryEl.value = "";
+      statusEl.value = "";
+      applyCaseFilters();
+    }
+    resetBtn.addEventListener("click", resetCaseFilters);
+    emptyResetBtn.addEventListener("click", resetCaseFilters);
+  }
+</script>

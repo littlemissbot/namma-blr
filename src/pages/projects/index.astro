@@ -1,0 +1,271 @@
+---
+import Base from "../../layouts/Base.astro";
+import { getProjects, latestCost, overrunPct, slippageMonths, isStale, getProjectSourceIds, agencyLabel } from "../../lib/data";
+
+const projects = getProjects();
+const rows = projects.map((p) => ({
+  project: p,
+  cost: latestCost(p.id),
+  overrun: overrunPct(p.id),
+  slippage: slippageMonths(p),
+  stale: isStale(p),
+  sources: getProjectSourceIds(p.id).length,
+}));
+
+const uniqueSorted = (values: string[]) => [...new Set(values)].sort();
+const agencies = uniqueSorted(rows.map((r) => r.project.agency));
+const categories = uniqueSorted(rows.map((r) => r.project.category));
+const statuses = uniqueSorted(rows.map((r) => r.project.status));
+const confidences = ["high", "medium", "low"].filter((c) => rows.some((r) => r.project.confidence === c));
+
+const label = (s: string) => s.replace(/_/g, " ");
+---
+
+<Base title="Projects">
+  <h1>Projects</h1>
+  <p>
+    Every tracked project, one row each. Filter and sort below — export always covers the
+    full table, not just what's currently shown: <a href="/projects.csv">CSV</a> or
+    <a href="/projects.json">JSON</a>.
+  </p>
+
+  {
+    rows.length === 0 ? (
+      <p>No projects published yet. See <a href="/about-the-data">how this site sources its data</a>.</p>
+    ) : (
+      <>
+        <div class="filter-bar" role="search" aria-label="Filter projects">
+          <label>
+            <span>Search</span>
+            <input type="text" id="f-search" placeholder="Project or agency…" autocomplete="off" />
+          </label>
+          <label>
+            <span>Agency</span>
+            <select id="f-agency">
+              <option value="">All</option>
+              {agencies.map((a) => <option value={a}>{a}</option>)}
+            </select>
+          </label>
+          <label>
+            <span>Category</span>
+            <select id="f-category">
+              <option value="">All</option>
+              {categories.map((c) => <option value={c}>{label(c)}</option>)}
+            </select>
+          </label>
+          <label>
+            <span>Status</span>
+            <select id="f-status">
+              <option value="">All</option>
+              {statuses.map((s) => <option value={s}>{label(s)}</option>)}
+            </select>
+          </label>
+          <label>
+            <span>Confidence</span>
+            <select id="f-confidence">
+              <option value="">All</option>
+              {confidences.map((c) => <option value={c}>{label(c)}</option>)}
+            </select>
+          </label>
+          <button type="button" id="f-reset" class="btn">Reset</button>
+        </div>
+        <p id="f-count" class="filter-count" aria-live="polite">Showing all {rows.length} projects.</p>
+
+        <div class="card table-card" style="overflow-x: auto;">
+          <table id="projects-table">
+            <thead>
+              <tr>
+                <th><button type="button" data-sort="name" data-type="text">Project</button></th>
+                <th><button type="button" data-sort="agency" data-type="text">Agency</button></th>
+                <th class="num"><button type="button" data-sort="cost" data-type="num">Latest cost</button></th>
+                <th class="num"><button type="button" data-sort="overrun" data-type="num">Overrun</button></th>
+                <th><button type="button" data-sort="status" data-type="text">Status</button></th>
+                <th class="num"><button type="button" data-sort="slippage" data-type="num">Slippage</button></th>
+                <th><button type="button" data-sort="verified" data-type="text">Verified on</button></th>
+                <th><button type="button" data-sort="confidence" data-type="text">Confidence</button></th>
+                <th class="num"><button type="button" data-sort="sources" data-type="num">Sources</button></th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map(({ project, cost, overrun, slippage, stale, sources }) => (
+                <tr
+                  class="row-link"
+                  data-href={`/projects/${project.id}`}
+                  data-name={project.name.toLowerCase()}
+                  data-agency={project.agency}
+                  data-category={project.category}
+                  data-status={project.status}
+                  data-confidence={project.confidence}
+                  data-cost={cost ? cost.amount_cr : ""}
+                  data-overrun={overrun ?? ""}
+                  data-slippage={slippage ?? ""}
+                  data-verified={project.verified_on}
+                  data-sources={sources}
+                >
+                  <td data-cell="name"><a href={`/projects/${project.id}`}>{project.name}</a></td>
+                  <td data-cell="agency">{agencyLabel(project)}</td>
+                  <td class="num" data-cell="cost">{cost ? `₹${cost.amount_cr.toLocaleString("en-IN")} cr` : "no data"}</td>
+                  <td class="num" data-cell="overrun">{overrun === null ? "no data" : `${overrun >= 0 ? "+" : ""}${overrun.toFixed(1)}%`}</td>
+                  <td data-cell="status"><span class={`status-tab status-${project.status}`}>{project.status.replace(/_/g, " ")}</span></td>
+                  <td class="num" data-cell="slippage">{slippage === null ? "no data" : `${slippage} mo`}</td>
+                  <td data-cell="verified">
+                    {project.verified_on}
+                    {stale && <span title="Not re-verified in the last two quarterly cycles"> ⚠</span>}
+                  </td>
+                  <td data-cell="confidence"><span class={`confidence confidence-${project.confidence}`}>{project.confidence}</span></td>
+                  <td class="num" data-cell="sources">{sources}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p id="f-empty" class="filter-empty" hidden>No projects match these filters. <button type="button" id="f-empty-reset">Clear filters</button></p>
+      </>
+    )
+  }
+</Base>
+
+<style>
+  #f-search { min-width: 12rem; }
+
+  #projects-table th button {
+    all: unset;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+    color: var(--ink-muted);
+    font-size: 0.82rem;
+  }
+  #projects-table th button:hover { color: var(--ink); }
+  #projects-table th button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #projects-table th button::after {
+    content: "";
+    width: 0;
+    opacity: 0.4;
+  }
+  #projects-table th button[data-active]::after {
+    content: attr(data-dir);
+    opacity: 1;
+  }
+  #projects-table th { position: sticky; top: 0; background: var(--card-bg); z-index: 1; }
+  .table-card { padding: 0.75rem 1rem; }
+
+  /* Whole row is the click target — the link inside is kept for keyboard/
+     screen-reader access and right-click/middle-click, but styled as plain
+     text so it doesn't read as a separate, narrower link target. */
+  #projects-table tbody tr.row-link { cursor: pointer; }
+  #projects-table td[data-cell="name"] a {
+    color: inherit;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  #projects-table tbody tr.row-link:hover td[data-cell="name"] a { color: var(--accent); }
+  #projects-table td[data-cell="name"] a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+</style>
+
+<script>
+  const table = document.getElementById("projects-table") as HTMLTableElement | null;
+  if (table) {
+    const tbody = table.tBodies[0];
+    const rows = Array.from(tbody.rows);
+    const countEl = document.getElementById("f-count")!;
+    const emptyEl = document.getElementById("f-empty")!;
+    const total = rows.length;
+
+    const searchEl = document.getElementById("f-search") as HTMLInputElement;
+    const agencyEl = document.getElementById("f-agency") as HTMLSelectElement;
+    const categoryEl = document.getElementById("f-category") as HTMLSelectElement;
+    const statusEl = document.getElementById("f-status") as HTMLSelectElement;
+    const confidenceEl = document.getElementById("f-confidence") as HTMLSelectElement;
+    const resetBtn = document.getElementById("f-reset")!;
+    const emptyResetBtn = document.getElementById("f-empty-reset")!;
+
+    tbody.addEventListener("click", (e) => {
+      const target = e.target as HTMLElement;
+      if (target.closest("a")) return; // let the real link handle its own click (new tab, etc.)
+      const row = target.closest("tr");
+      const href = row?.dataset.href;
+      if (href) window.location.href = href;
+    });
+
+    function applyFilters() {
+      const q = searchEl.value.trim().toLowerCase();
+      const agency = agencyEl.value;
+      const category = categoryEl.value;
+      const status = statusEl.value;
+      const confidence = confidenceEl.value;
+
+      let visible = 0;
+      for (const row of rows) {
+        const matches =
+          (!q || row.dataset.name!.includes(q) || row.dataset.agency!.toLowerCase().includes(q)) &&
+          (!agency || row.dataset.agency === agency) &&
+          (!category || row.dataset.category === category) &&
+          (!status || row.dataset.status === status) &&
+          (!confidence || row.dataset.confidence === confidence);
+        row.hidden = !matches;
+        if (matches) visible++;
+      }
+
+      countEl.hidden = visible === 0;
+      emptyEl.hidden = visible !== 0;
+      countEl.textContent =
+        visible === total ? `Showing all ${total} projects.` : `Showing ${visible} of ${total} projects.`;
+    }
+
+    for (const el of [searchEl, agencyEl, categoryEl, statusEl, confidenceEl]) {
+      el.addEventListener("input", applyFilters);
+    }
+    function resetFilters() {
+      searchEl.value = "";
+      agencyEl.value = "";
+      categoryEl.value = "";
+      statusEl.value = "";
+      confidenceEl.value = "";
+      applyFilters();
+    }
+    resetBtn.addEventListener("click", resetFilters);
+    emptyResetBtn.addEventListener("click", resetFilters);
+
+    // Sorting
+    let currentSort: { key: string; dir: 1 | -1 } | null = null;
+    const headerButtons = Array.from(table.querySelectorAll<HTMLButtonElement>("th button[data-sort]"));
+
+    function sortBy(key: string, type: string) {
+      const dir: 1 | -1 = currentSort && currentSort.key === key ? (currentSort.dir === 1 ? -1 : 1) : 1;
+      currentSort = { key, dir };
+
+      const sorted = rows.slice().sort((a, b) => {
+        const av = a.dataset[key] ?? "";
+        const bv = b.dataset[key] ?? "";
+        if (type === "num") {
+          const an = av === "" ? -Infinity : parseFloat(av);
+          const bn = bv === "" ? -Infinity : parseFloat(bv);
+          return (an - bn) * dir;
+        }
+        return av.localeCompare(bv) * dir;
+      });
+
+      for (const row of sorted) tbody.appendChild(row);
+
+      for (const btn of headerButtons) {
+        if (btn.dataset.sort === key) {
+          btn.setAttribute("data-active", "");
+          btn.setAttribute("data-dir", dir === 1 ? "▲" : "▼");
+        } else {
+          btn.removeAttribute("data-active");
+        }
+      }
+    }
+
+    for (const btn of headerButtons) {
+      btn.addEventListener("click", () => sortBy(btn.dataset.sort!, btn.dataset.type!));
+    }
+  }
+</script>

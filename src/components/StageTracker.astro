@@ -1,0 +1,37 @@
+---
+// A Namma Metro line-diagram, repurposed: stops instead of stations,
+// filled up to the project's current build stage. Renders nothing for
+// stalled/cancelled projects — we don't record which stage they stalled at,
+// and a fabricated position would misstate the record (spec P5).
+import { STAGE_ORDER, stageIndex, type Project } from "../lib/data";
+
+interface Props {
+  status: Project["status"];
+  showLabels?: boolean;
+}
+
+const { status, showLabels = false } = Astro.props;
+const current = stageIndex(status);
+---
+
+{
+  current !== null && (
+    <div>
+      <div class="stage-tracker" role="img" aria-label={`Build stage: ${status.replace(/_/g, " ")}`}>
+        {STAGE_ORDER.map((stage, i) => (
+          <>
+            {i > 0 && <span class={`seg ${i <= current ? "filled" : ""}`} />}
+            <span class={`stop ${i < current ? "done" : ""} ${i === current ? "current" : ""}`} />
+          </>
+        ))}
+      </div>
+      {showLabels && (
+        <div class="stage-labels">
+          <span>
+            Stage {current + 1} of {STAGE_ORDER.length}: {status.replace(/_/g, " ")}
+          </span>
+        </div>
+      )}
+    </div>
+  )
+}

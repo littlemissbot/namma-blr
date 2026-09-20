@@ -1,0 +1,16 @@
+{
+  "id": "pink-line",
+  "name": "Pink Line (Kalena Agrahara – Nagawara)",
+  "aka": ["Namma Metro Phase 2 Pink Line"],
+  "agency": "BMRCL",
+  "category": "metro_rail",
+  "scope": "21.39 km, 18 stations, part of Namma Metro Phase 2, opening in two sections",
+  "status": "under_construction",
+  "current_deadline": "2027-03-01",
+  "pending": "The first 7.5 km section (Kalena Agrahara–Tavarekere, 6 stations) is construction-complete and trial-run stage; commercial opening is awaiting the Government of India's confirmation of an inauguration date, as reported by Newskarnataka on 2026-09-03 and still unopened per that report as of 2026-08-26. The remaining Dairy Circle–Nagawara stretch is expected around March 2027, per The Metro Rail Guy.",
+  "wards": [],
+  "corporation": "Central",
+  "confidence": "medium",
+  "verified_on": "2026-09-20",
+  "notes": "Corporation set to Central as a placeholder — this corridor spans Central/South/North; not yet mapped to wards. Money timeline is package-level, not a single project total: ₹405 cr for trainsets, plus individual civil-works contract values for the Reach 6 elevated section (originally ₹578.70 cr to Simplex Infrastructures, terminated 2021-02-04 at ~37% complete for poor progress, re-awarded at ₹364.87 cr to GR Infraprojects) and one of the underground packages (₹1,771.25 cr, ITD Cementation). A Wikipedia-reported aggregate figure of ₹5,925.95 cr for all underground tunneling packages combined, and a ₹9,508.33 cr total-line figure covering all phases, are not recorded here as this site has not independently verified either total against a primary or directly-fetched source — only the individually-confirmed package values above are on file. No figure exists yet for the remaining underground package (Dairy Circle–Langford Town–MICO Industries, Afcons Infrastructure)."
+}

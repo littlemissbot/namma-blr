@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://namma-bengaluru/schema/project.schema.json",
+  "title": "project",
+  "description": "Spec §3.1. One project record per stable slug id.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name",
+    "agency",
+    "category",
+    "scope",
+    "status",
+    "wards",
+    "corporation",
+    "confidence",
+    "verified_on"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable, human-readable slug, e.g. metro-phase-2",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "name": { "type": "string", "description": "As the agency calls it" },
+    "aka": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Alternate names for search"
+    },
+    "agency": {
+      "enum": ["BMRCL", "BMTC", "BDA", "BWSSB", "K-RIDE", "B-SMILE", "GBA", "corporation", "other"]
+    },
+    "category": {
+      "enum": ["metro_rail", "roads", "buses", "water_sewerage", "drains_lakes", "parks_public"]
+    },
+    "scope": { "type": "string", "description": "e.g. \"75.09 km, 4 extensions, 2 new lines\"" },
+    "status": {
+      "enum": [
+        "announced",
+        "sanctioned",
+        "tendering",
+        "awarded",
+        "under_construction",
+        "partially_open",
+        "complete",
+        "stalled",
+        "cancelled"
+      ]
+    },
+    "sanction_date": { "type": ["string", "null"], "format": "date" },
+    "original_deadline": { "type": ["string", "null"], "format": "date" },
+    "current_deadline": { "type": ["string", "null"], "format": "date" },
+    "pending": { "type": "string", "description": "What is blocking it, factually stated" },
+    "geometry": {
+      "description": "LineString for corridors, Point for facilities, Polygon for areas",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["type", "coordinates"],
+          "properties": {
+            "type": { "enum": ["Point", "LineString", "Polygon"] },
+            "coordinates": {}
+          }
+        }
+      ]
+    },
+    "wards": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Ward codes the project touches"
+    },
+    "corporation": {
+      "enum": ["Central", "East", "North", "South", "West", "outside_GBA"]
+    },
+    "confidence": { "enum": ["high", "medium", "low"] },
+    "verified_on": {
+      "type": "string",
+      "format": "date",
+      "description": "Last date a human checked this record"
+    },
+    "notes": { "type": "string", "description": "Caveats, conflicting figures" }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "project_id": "bmtc-electric-buses",
+  "fiscal_year": "2026-27",
+  "kind": "sanctioned",
+  "amount_cr": 12000,
+  "funder": "state",
+  "funder_detail": "Estimated 20-year total state expenditure under the Gross Cost Contract model (~₹600 cr/year); a separate ₹2,000 cr loan has been sought from the central government for depot development, not included in this figure",
+  "source_id": "S16",
+  "as_of": "2026-09-07",
+  "comparable_to_prior": true
+}
