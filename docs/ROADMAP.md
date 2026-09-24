@@ -34,7 +34,7 @@ data meets the quality bar.
 | G4 | **"My ward"** (locate me, pin, search, ward pages) | [04](./plans/04-my-ward.md) | 3 | G2, G3 |
 | G5 | **Ask your representative** (factual letter + RTI templates) | [05](./plans/05-ask-your-representative.md) | 3 | G4 |
 | G6 | **What-changed feed + quarterly cadence automation** | [06](./plans/06-change-feed-and-cadence.md) | 4 | G1 |
-| G7 | **Kannada** | [07](./plans/07-kannada.md) | cross-cutting | G0 decision; before G3/G4 pages |
+| G7 | **Kannada** (good to have) | [07](./plans/07-kannada.md) | cross-cutting | Strings kept in one file from G3 onward |
 
 ## Sequence
 
@@ -46,7 +46,7 @@ sweep window from spec §6.1.
 G0 found.   ██████
 G1 backfill   ██████████████████████████████████████████  (ongoing after)
 G2 geo/wards      ██████████████
-G7 Kannada          ████ routing ·········· translation ·····
+G7 Kannada          ·· strings in one file ··········· (when there's capacity)
 G3 map                        ████████ preview ──▶ public (gate)
 G4 my ward                                ██████████████
 G5 ask rep                                          ████████████
@@ -54,35 +54,41 @@ G6 feed         ██ small ····················· ██�
 ```
 
 **Milestones**
-1. **M1, Foundations closed (end of Oct 2026):** licence, publisher and
-   Kannada decided; schema additions merged; every existing source archived;
-   CI running.
+1. **M1, Foundations closed (end of Oct 2026):** licence and backfill
+   threshold decided; schema additions merged; every existing source
+   archived; CI running; RTI filed for official GBA ward boundaries.
 2. **M2, Metro at high confidence (Jan 2027 sweep):** all metro projects
    re-sourced to primary documents, with FY2016-17 onward covered. This
    meets the spec's Phase 1 bar.
 3. **M3, Geometry complete (Jan 2027):** every project has geometry or a
    stated reason why not, and wards are assigned automatically.
 4. **M4, Public launch (Apr 2027 sweep, after the Karnataka budget):**
-   map, ward pages, Kannada interface, legal review done.
+   map, ward pages, legal review done. A publisher of record and a Kannada
+   interface are good to have by then, but don't block the launch.
 5. **M5, Action tools (Jul 2027 sweep):** letter and RTI templates, and the
    feed with cadence automation.
 
-## Borrowing from Kaun
+## Data sourcing policy
 
-[Kaun](https://kaun.city) ([source](https://github.com/kaun-city/kaun)) does
-**ward accountability**: who represents you, and what was spent in your ward.
-NammaBLR does **project accountability**: what was promised, what it costs,
-and how late it is. The two are complementary rather than overlapping. Kaun
-has a small typed project model (`apps/web/lib/civic-projects.ts`, six
-projects) but no project geometry. NammaBLR's dataset could feed those
-project cards, which makes a good case for approaching Kaun as a collaborator
-rather than a competitor.
+**Primary government sources come first.** OpenCity, Kaun and GTrack data are
+not used unless necessary, that is, only when no official or primary
+equivalent can be found, including through RTI. Any such use is recorded,
+with the reason, on the source record or in the dataset's `SOURCE.md`.
+Derived data (ward crosswalks, project-to-ward assignments) is always built
+in-house. This keeps every figure traceable to a government document (P1),
+keeps confidence levels honest, and keeps the data licence simple.
 
-**Adopting** (with attribution and licence checks, see Plan 0):
-- Ward picking by geolocation, map pin, or search that includes old ward names (Plan 4)
-- The GBA 369-ward GeoJSON pipeline from OpenCity's KML (`scripts/generate-gba-wards.mjs`, MIT) (Plan 2)
-- Old-to-new ward crosswalks. They are CC BY-SA 4.0, so reuse means share-alike; the alternative is to re-derive them (Plan 2)
-- Project records carrying `affectedWards` together with a stated `wardBasis` (Plan 0 schema, Plan 2)
+## Learning from Kaun (ideas, not data)
+
+[Kaun](https://kaun.city) does **ward accountability**: who represents you,
+and what was spent in your ward. NammaBLR does **project accountability**:
+what was promised, what it costs, and how late it is. Kaun's map colours wards
+by indicators and has no layer for infrastructure projects, so the two
+complement each other.
+
+**Interaction ideas we're adopting** (implemented on our own data):
+- Picking a ward by geolocation, map pin, or search that includes old ward names (Plan 4)
+- Stating how each project's ward list was derived (`ward_basis`) (Plans 0, 2)
 - Shareable, URL-addressable ward views (Plan 4)
 
 **Not adopting, and why** (each conflicts with the spec, not with Kaun's own

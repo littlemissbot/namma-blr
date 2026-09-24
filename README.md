@@ -101,23 +101,24 @@ each, is in [`docs/ROADMAP.md`](./docs/ROADMAP.md).
 
 ## Open decisions (spec §10.1) — not yet resolved
 
-- Kannada at launch, or English first? Affects Phase 1; retrofitting is expensive.
+- Kannada at launch, or English first? *Good to have, not a launch blocker;*
+  interface strings will be kept in one file so adding it later stays cheap.
 - Named individuals in project content: spec recommends **out** — projects and
   agencies only.
 - Who is the publisher of record (named individual, or a separate civic entity)?
-  Affects legal exposure and perceived political framing.
-- Approach OpenCity.in as a data collaborator before scraping their BBMP budget
-  holdings. The same question applies to two other Bengaluru civic-data projects
-  surfaced during a prior-art check: [GTrack.in](https://www.gtrack.in) (a national
-  government-project tracker with some directly overlapping records) and
-  [KAUN](https://kaun.city) ([source](https://github.com/kaun-city/kaun), MIT-licensed
-  — its ward-boundary crosswalk data is a candidate for reuse in Phase 3 instead of
-  re-deriving it).
+  Affects legal exposure and perceived political framing. *Good to have, not a
+  launch blocker.*
+- **Decided:** data from other Bengaluru civic-data projects
+  ([OpenCity](https://opencity.in), [GTrack.in](https://www.gtrack.in),
+  [KAUN](https://kaun.city)) is not used unless necessary, meaning only when no
+  official or primary source can be found (including through RTI), and any such use
+  is recorded with its reason. Ward crosswalks are derived in-house. See
+  [`docs/ROADMAP.md`](./docs/ROADMAP.md#data-sourcing-policy).
 - Comments / citizen reports: spec recommends **no**, at least initially — changes the
   IT Act intermediary-liability position.
 
 **Before Phase 1 ships:** legal review of the disclaimer draft in `content/disclaimer.md`
-and the Kannada decision above (spec p.12).
+(spec p.12).
 
 ## Contributing
 

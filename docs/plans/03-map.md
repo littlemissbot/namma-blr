@@ -11,8 +11,8 @@ fund utilisation, attendance and criminal cases. It also has click-to-pin,
 infrastructure projects**: its six project cards have no geometry.
 
 NammaBLR's map is the other half. It shows **projects as lines, points and
-polygons**, coloured by status. We borrow Kaun's ward-picking interactions
-(Plan 4) but not its indicator layers (see "Not adopting" in the roadmap).
+polygons**, coloured by status. We borrow Kaun's ward-picking interaction
+*ideas* (Plan 4), but not its data or its indicator layers (see the roadmap).
 
 ## Launch gate (spec §9: "thin data on a map looks authoritative")
 

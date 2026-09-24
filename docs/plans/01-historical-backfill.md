@@ -7,8 +7,8 @@
 
 Pre-2020 history is the spec's main defence against the site being read as
 partisan (P9). The 10-year window from FY2016-17 covers at least two changes of
-government in Karnataka, and it lines up with where OpenCity's BBMP budget
-holdings start.
+government in Karnataka, and BBMP's own published budgets are available
+from roughly the same point.
 
 Backfilling also means upgrading records, not just adding older ones. Today
 36 of the 39 sources are `news`, every project is `medium` confidence, no
@@ -49,9 +49,13 @@ review much easier.
    for audits covering BBMP, BMRCL, BWSSB or urban development. This is the
    only reliable source of `utilised` figures and of sanctioned-against-spent
    comparisons.
-4. **OpenCity BBMP budgets, 2016-17 onward.** Only after the collaborator
-   conversation in [Plan 0](./00-foundations.md). These give ward- and
-   corporation-level works: roads, drains and lakes.
+4. **BBMP / GBA budget documents, 2016-17 onward**, taken from the
+   corporation's own site. For years that have been taken down, use Wayback
+   snapshots of the official URLs, then RTI. These give corporation-level
+   works: roads, drains and lakes. Third-party mirrors (such as OpenCity) are
+   used only if a year can't be recovered any other way, and the reason is
+   noted on the source record (per the [Plan 0](./00-foundations.md)
+   decision).
 5. **Karnataka Legislative Assembly and Council question replies**
    (kla.kar.nic.in). These give project-wise status and deadlines, and are
    usually PDFs.

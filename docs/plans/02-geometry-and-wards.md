@@ -5,8 +5,13 @@
 **Can run in parallel with:** Plan 1 (backfill).
 
 Today, no project has geometry or wards. The map (Plan 3) and the "my ward" view
-(Plan 4) both need this data layer first. It is also the part where Kaun's open
-data saves the most work.
+(Plan 4) both need this data layer first.
+
+**Sourcing rule (Plan 0 decision):** boundaries come from official or primary
+sources. Third-party civic datasets (OpenCity, Kaun, GTrack) are a last resort,
+used only when no official file can be obtained, with the reason written into
+that scheme's `SOURCE.md`. Crosswalks and ward assignments are always derived
+in-house.
 
 ## 1. Ward boundaries
 
@@ -14,27 +19,40 @@ Keep **both** boundary sets (spec §8.3), with a scheme prefix on every code:
 
 | Scheme | Code format | Source | Notes |
 | --- | --- | --- | --- |
-| `gba2025` | `gba2025:<corporation_id>-<ward_no>` | OpenCity "GBA 369 wards, December 2025" KML (the same file Kaun converts in `scripts/generate-gba-wards.mjs`) | Ward numbers restart in each corporation, so the corporation id is part of the key. Corporation ids 1–5 are Central/North/East/South/West. |
-| `bbmp243` | `bbmp243:<ward_no>` | DataMeet `Municipal_Spatial_Data/Bangalore/BBMP.geojson` | 2022 delimitation |
-| `bbmp198` | `bbmp198:<ward_no>` | DataMeet `BBMP_oldWards.geojson` | 2010 wards. Most pre-2022 budget documents refer to these. |
+| `gba2025` | `gba2025:<corporation_id>-<ward_no>` | The Karnataka government's 2025 GBA ward delimitation: the final notification in the Karnataka Gazette and its ward maps, plus any GIS layer published on the state GIS portal, KGIS (spec §8.3). | Ward numbers restart in each corporation, so the corporation id is part of the key. Corporation ids 1–5 are Central/North/East/South/West. |
+| `bbmp243` | `bbmp243:<ward_no>` | The 2022/2023 BBMP delimitation notification and maps. If no machine-readable layer is published, use DataMeet's municipal spatial data (an open-data community project, not one of the three excluded datasets); check its licence. | 2022 delimitation |
+| `bbmp198` | `bbmp198:<ward_no>` | The 2010 BBMP ward maps. As with 243, fall back to DataMeet if nothing official is machine-readable. | 2010 wards. Most pre-2022 budget documents refer to these. |
+
+**Getting official GIS files.** Delimitation notifications are usually
+published as PDF maps and written boundary descriptions, not shapefiles. In
+order:
+1. Look for a published layer on KGIS or the GBA / Urban Development
+   Department sites.
+2. File an RTI with GBA / UDD / KSRSAC asking for the ward boundary shapefile
+   or KML. Do this early, because replies take 30 days or more.
+3. If only PDF maps exist, georeference and digitise them, using the written
+   boundary descriptions and OSM roads as snapping guides. This takes a lot of
+   work for 369 wards, but it's feasible as a contributor task split by
+   corporation.
+4. Last resort: a third-party file, with the reason recorded in `SOURCE.md`.
 
 Steps:
-1. Fetch the source files into `data/wards/<scheme>/source/` with a
-   `SOURCE.md` recording the URL, retrieval date and licence.
-2. Write `scripts/build-wards.mjs`. It converts KML to GeoJSON (Kaun's
-   `scripts/lib/kml.mjs` is MIT-licensed and can be reused), normalises the
-   properties to `{code, name, name_kn, corporation, assembly_constituency}`,
-   and writes:
+1. Put the source files into `data/wards/<scheme>/source/` with a
+   `SOURCE.md` recording the URL (or RTI reference), retrieval date and
+   licence.
+2. Write `scripts/build-wards.mjs`. It converts the source format (KML,
+   shapefile or digitised GeoJSON) to GeoJSON, normalises the properties to
+   `{code, name, name_kn, corporation, assembly_constituency}`, and
+   writes:
    - `data/wards/<scheme>/wards.geojson`: full resolution, used for spatial joins
    - `public/geo/wards-<scheme>.json`: simplified with mapshaper, targeting
-     roughly 300 KB. Kaun's full file is 3.8 MB, far too heavy for phones on a
-     WhatsApp link.
-3. **Crosswalk.** Either reuse Kaun's
-   `data/ward-crosswalk/gba2025_369_to_datameet_243.json` and
-   `bbmp2010_198_to_datameet_243.json`, which are CC BY-SA 4.0 and so have
-   share-alike implications, or re-derive them with a small area-overlap
-   script. Area overlap is about 50 lines with `@turf/intersect`, and its
-   licence would be ours. Decide in Plan 0.
+     roughly 300 KB. A full-resolution 369-ward file is several MB, far too
+     heavy for phones arriving from a WhatsApp link.
+3. **Crosswalk (in-house).** `scripts/build-crosswalk.mjs` computes area
+   overlap between every pair of schemes (198 ↔ 243 ↔ GBA 2025) with
+   `@turf/intersect` and records each overlap's share in both directions. It
+   is about 50 lines, reproducible from the committed boundaries, and
+   licensed with the rest of `data/`.
 
 ## 2. Project geometry
 
@@ -61,8 +79,7 @@ retrieval date, so the geometry can be traced like any other figure.
 ## 3. Assigning wards to projects
 
 `scripts/assign-wards.mjs`:
-- Buffers each geometry (40 m for lines, following Kaun's "within 40 m of the
-  alignment" rule; none for polygons and points), intersects it with every
+- Buffers each geometry (40 m for lines; none for polygons and points), intersects it with every
   ward scheme, and writes the resulting `wards` array and `ward_basis`.
 - Sets `corporation` from the GBA wards. Where a project spans several
   corporations, add `corporations[]`. This replaces the current "Central as
@@ -80,9 +97,10 @@ retrieval date, so the geometry can be traced like any other figure.
 
 ## Issues to open
 
-- [ ] Import GBA 369 wards (OpenCity KML)
-- [ ] Import BBMP 198 and 243 wards (DataMeet)
-- [ ] Crosswalk: reuse Kaun's or re-derive (licence decision)
+- [ ] Find the GBA 2025 delimitation notification + maps; check KGIS for a GIS layer
+- [ ] File RTI for GBA 369-ward boundary shapefile/KML (GBA / UDD / KSRSAC)
+- [ ] Import BBMP 198 and 243 wards (official first, DataMeet fallback)
+- [ ] `build-crosswalk` script (in-house area overlap)
 - [ ] `fetch-osm-geometry` script
 - [ ] Geometry for the 14 metro projects
 - [ ] Geometry for roads (PRR, tunnel, Varthur–Gunjur, Alpine Eco)

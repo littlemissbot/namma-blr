@@ -11,8 +11,8 @@ when it's missed.
 
 - `/changes`: all events in reverse date order, filterable by agency, category
   and ward.
-- `/changes.xml` (RSS) and `/changes.json`, so journalists and Kaun's
-  "City Pulse" can subscribe.
+- `/changes.xml` (RSS) and `/changes.json`, so journalists and other civic
+  projects can subscribe.
 - Per-project and per-ward feeds, which come free from the same endpoint.
 - Build these from the Git history too: "record updated" entries taken from
   commits that touch `data/`. This makes the "every change auditable"

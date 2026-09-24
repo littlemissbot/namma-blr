@@ -45,7 +45,7 @@ anything is added.
 
 - [ ] Agency PIO directory with sources
 - [ ] Summary generator (pure function over `src/lib/data.ts`)
-- [ ] Letter template (English + Kannada) and counsel review
-- [ ] RTI template (English + Kannada) with gap-driven questions
+- [ ] Letter template (English; Kannada when Plan 7 lands) and counsel review
+- [ ] RTI template (English; Kannada when Plan 7 lands) with gap-driven questions
 - [ ] "Ask about this" panel on project and ward pages
 - [ ] Intake process for reader-shared RTI replies (email, reviewed, then a normal source PR)
