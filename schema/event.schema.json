@@ -11,6 +11,7 @@
     "date": { "type": "string", "format": "date" },
     "type": {
       "enum": [
+        "announced",
         "sanctioned",
         "tender_floated",
         "bid_received",
@@ -18,12 +19,25 @@
         "deadline_revised",
         "section_opened",
         "cost_revised",
-        "stalled"
+        "stalled",
+        "resumed",
+        "completed",
+        "cancelled"
       ]
     },
     "summary": {
       "type": "string",
       "description": "Factual, one sentence, no characterisation (P5)"
+    },
+    "previous_deadline": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "deadline_revised only: the deadline before this revision, where the source states it (spec §5.3 deadline history)"
+    },
+    "new_deadline": {
+      "type": "string",
+      "format": "date",
+      "description": "deadline_revised only: the deadline after this revision. Required on deadline_revised events (enforced by the validator)."
     },
     "source_id": { "type": "string", "description": "FK to source.id" }
   }

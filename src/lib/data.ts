@@ -33,8 +33,10 @@ export interface Project {
   current_deadline?: string | null;
   pending?: string;
   geometry?: unknown;
+  geometry_basis?: "surveyed" | "osm" | "approximate" | "unknown";
   wards: string[];
-  corporation: "Central" | "East" | "North" | "South" | "West" | "outside_GBA";
+  ward_basis?: string;
+  corporation: "Central" | "East" | "North" | "South" | "West" | "outside_GBA" | "BBMP";
   confidence: Confidence;
   verified_on: string;
   notes?: string;
@@ -47,6 +49,7 @@ export interface MoneyEntry {
   amount_cr: number;
   funder: "state" | "centre" | "agency_borrowing" | "external" | "private";
   funder_detail?: string;
+  budget_head?: string;
   source_id: string;
   as_of: string;
   comparable_to_prior?: boolean;
@@ -56,6 +59,7 @@ export interface Event {
   project_id: string;
   date: string;
   type:
+    | "announced"
     | "sanctioned"
     | "tender_floated"
     | "bid_received"
@@ -63,8 +67,13 @@ export interface Event {
     | "deadline_revised"
     | "section_opened"
     | "cost_revised"
-    | "stalled";
+    | "stalled"
+    | "resumed"
+    | "completed"
+    | "cancelled";
   summary: string;
+  previous_deadline?: string | null;
+  new_deadline?: string;
   source_id: string;
 }
 
@@ -213,9 +222,10 @@ export function slippageMonths(project: Project): number | null {
  * which corporation instead wherever agency is displayed.
  */
 export function agencyLabel(project: Project): string {
-  return project.agency === "corporation"
-    ? `Bengaluru ${project.corporation.replace(/_/g, " ")} City Corporation`
-    : project.agency;
+  if (project.agency !== "corporation") return project.agency;
+  // Records from before the 2025 GBA restructuring belong to the single BBMP.
+  if (project.corporation === "BBMP") return "BBMP";
+  return `Bengaluru ${project.corporation.replace(/_/g, " ")} City Corporation`;
 }
 
 /** A project's verified_on is stale if the site's quarterly cycle has turned over twice since (spec P7/§6.2). */

@@ -1,0 +1,84 @@
+# Plan 0: Foundations (unblocks everything else)
+
+**Roadmap goal:** G0. **Spec:** §7, §8.2, §10.1.
+**Why first:** every later goal either writes records in a shape that is
+expensive to change afterwards, or publishes something that needs a licence.
+Getting these settled now is cheap; changing them after the backfill is not.
+
+## 1. Decisions
+
+### Decided
+
+| Decision | Outcome |
+| --- | --- |
+| Third-party civic datasets (OpenCity, Kaun, GTrack) | **Not used unless necessary.** Primary government sources come first. A third-party file may be used only when no official or primary equivalent can be found (including through RTI), and only if the reason is recorded in the dataset's `SOURCE.md`. Our own derived data, such as the ward crosswalk, is built in-house. |
+| Named individuals | **Out** for project content. Elected representatives appear only as "who represents this ward" contact details, never alongside project blame (Plan 5). |
+| Comments / citizen reports | **No** (IT Act intermediary liability, spec §7.1). |
+
+### To close (blocking)
+
+| Decision | Recommendation | Blocks |
+| --- | --- | --- |
+| Data licence for `data/` | **ODbL** or **CC BY 4.0**. Because we build the crosswalks ourselves and avoid third-party civic datasets, the only inputs whose licences need checking are OpenStreetMap geometry (ODbL) and the historical ward boundaries (see Plan 2). ODbL is the simpler fit if OSM-derived geometry ships in `data/`. | Plans 2, 3 |
+| Backfill threshold | Track BBMP/GBA works only above about ₹50 cr, or where there is notable public interest | Plan 1 |
+
+### Good to have (not blocking)
+
+| Decision | Recommendation | Needed by |
+| --- | --- | --- |
+| Publisher of record | A named civic entity rather than an individual (spec §10.1). Useful input for the legal review, but no build work waits on it. | Public launch, ideally |
+| Kannada at launch | Nice to have at launch, not required. Keep interface strings in one place from now on so adding Kannada later stays cheap (Plan 7). | — |
+
+## 2. Schema additions (all additive, so existing records stay valid)
+
+- `event.type` += `announced`, `completed`, `cancelled`, `resumed`
+- `event.previous_deadline`, `event.new_deadline`: optional dates. Once the
+  project page reads these, the validator should require them on
+  `deadline_revised` events.
+- `money_entry.budget_head`: optional string
+- `project.corporation` += `BBMP` (for records that predate GBA)
+- `project.wards`: scheme-prefixed codes, e.g. `gba2025:3-41`, `bbmp198:150`
+  (see Plan 2)
+- `project.geometry_basis`: `surveyed | osm | approximate | unknown`. This lets
+  the map say "approximate" rather than drawing a false line (spec §5.1).
+- `project.ward_basis`: how the ward list was derived (e.g. "within 40 m
+  of the OSM alignment").
+
+Geometry is large, so it moves out of the project JSON into
+`data/geometry/<project-id>.geojson`. That keeps project diffs readable.
+
+## 3. Tooling
+
+- `scripts/archive-sources.mjs`: submits every source with `archive_url: null`
+  to the Wayback Machine's Save Page Now and writes the snapshot URL back.
+  Runs by hand and in CI as a warning, not a build failure.
+- `scripts/new-record.mjs`: interactive scaffolding for a
+  source, money_entry or event. It reduces hand-typed JSON mistakes, which
+  matters for contributors who don't write code.
+- Validator additions:
+  - warn when a `money_entry`'s `fiscal_year` and `as_of` disagree by more
+    than a year
+  - warn on duplicate figures (same project, kind, amount and date)
+  - fail when a ward code doesn't resolve to a known ward
+- CI: run `npm run validate` and `npm run build` on every PR (GitHub Actions).
+- `CONTRIBUTING.md`: the §4.4 workflow as a checklist, plus the PR-per-document
+  convention from Plan 1.
+
+## 4. Hosting
+
+Static hosting on infrastructure already in use (spec §8.2). Cloudflare Pages
+and GitHub Pages are both free and both work with the PMTiles approach in
+Plan 3. Set up the domain (`nammablr.org`) here.
+
+## Issues to open
+
+- [ ] Decide data licence (check OSM and historical-ward-boundary licences first)
+- [ ] Decide backfill threshold
+- [ ] (Good to have) Decide publisher of record
+- [ ] (Good to have) Decide Kannada at launch
+- [x] Schema additions PR (event types, deadline fields, budget_head, BBMP, basis fields)
+- [x] `archive-sources` script (+ weekly workflow)
+- [ ] `new-record` scaffolding script
+- [x] Validator additions
+- [x] GitHub Actions: validate + build on PR
+- [x] CONTRIBUTING.md

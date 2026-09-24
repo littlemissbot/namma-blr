@@ -63,7 +63,25 @@ Runs before every `npm run build`. Enforces spec §8.4 mechanically:
 - a project's `confidence` is consistent with the `doc_type` of the sources backing it
   (see the doc_type → confidence mapping in spec §3.4/§4.1)
 
-A build with invalid or under-sourced data fails.
+- deadline fields appear only on `deadline_revised` events
+- ward codes resolve against the imported boundary file for their scheme (once
+  `data/wards/<scheme>/wards.geojson` exists)
+
+A build with invalid or under-sourced data fails. The validator also **warns**, without
+failing, about sources with no archive snapshot, `deadline_revised` events with no
+`new_deadline`, figures whose `as_of` is well outside their `fiscal_year`, and
+duplicate figures.
+
+CI runs the validator and build on every PR (`.github/workflows/ci.yml`).
+
+## Archiving sources
+
+```sh
+npm run archive-sources             # use existing Wayback snapshots
+npm run archive-sources -- --save   # also capture missing ones
+```
+
+A weekly workflow (`.github/workflows/archive-sources.yml`) does the same and opens a PR.
 
 ## Site
 
@@ -86,6 +104,10 @@ corrections log.
 
 ## Build phases (spec §9)
 
+The current roadmap, which breaks these phases into goals with a plan of action for
+each, is in [`docs/ROADMAP.md`](./docs/ROADMAP.md).
+
+
 1. **Metro only.** Table + project pages, no map. *(Underway — broadened to 7
    agencies ahead of schedule; map deliberately not started yet, per the spec's own
    warning that thin data looks falsely authoritative on a map.)*
@@ -97,27 +119,29 @@ corrections log.
 
 ## Open decisions (spec §10.1) — not yet resolved
 
-- Kannada at launch, or English first? Affects Phase 1; retrofitting is expensive.
+- Kannada at launch, or English first? *Good to have, not a launch blocker;*
+  interface strings will be kept in one file so adding it later stays cheap.
 - Named individuals in project content: spec recommends **out** — projects and
   agencies only.
 - Who is the publisher of record (named individual, or a separate civic entity)?
-  Affects legal exposure and perceived political framing.
-- Approach OpenCity.in as a data collaborator before scraping their BBMP budget
-  holdings. The same question applies to two other Bengaluru civic-data projects
-  surfaced during a prior-art check: [GTrack.in](https://www.gtrack.in) (a national
-  government-project tracker with some directly overlapping records) and
-  [KAUN](https://kaun.city) ([source](https://github.com/kaun-city/kaun), MIT-licensed
-  — its ward-boundary crosswalk data is a candidate for reuse in Phase 3 instead of
-  re-deriving it).
+  Affects legal exposure and perceived political framing. *Good to have, not a
+  launch blocker.*
+- **Decided:** data from other Bengaluru civic-data projects
+  ([OpenCity](https://opencity.in), [GTrack.in](https://www.gtrack.in),
+  [KAUN](https://kaun.city)) is not used unless necessary, meaning only when no
+  official or primary source can be found (including through RTI), and any such use
+  is recorded with its reason. Ward crosswalks are derived in-house. See
+  [`docs/ROADMAP.md`](./docs/ROADMAP.md#data-sourcing-policy).
 - Comments / citizen reports: spec recommends **no**, at least initially — changes the
   IT Act intermediary-liability position.
 
 **Before Phase 1 ships:** legal review of the disclaimer draft in `content/disclaimer.md`
-and the Kannada decision above (spec p.12).
+(spec p.12).
 
 ## Contributing
 
-Follow the collection workflow in spec §4.4: locate the primary document → extract
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the data-PR checklist. In short: follow
+the collection workflow in spec §4.4: locate the primary document → extract
 figures with page references → snapshot the URL (Wayback) → record `as_of` and
 `retrieved_on` → set `confidence` from `doc_type` → flag any conflict with an existing
 figure in `notes` rather than overwriting it. Run `npm run validate` before opening a

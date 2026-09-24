@@ -20,6 +20,10 @@
       "type": "string",
       "description": "When funder is external: JICA, World Bank, HUDCO, etc."
     },
+    "budget_head": {
+      "type": "string",
+      "description": "Budget line, head of account or scheme name as printed in the source, so the figure can be found again in the document"
+    },
     "source_id": { "type": "string", "description": "FK to source.id" },
     "as_of": { "type": "string", "format": "date", "description": "When the figure was true" },
     "comparable_to_prior": {
