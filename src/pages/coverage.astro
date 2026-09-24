@@ -1,0 +1,156 @@
+---
+import Base from "../layouts/Base.astro";
+import { coverageMatrix, agencyLabel, BACKFILL_START_FY } from "../lib/data";
+
+const { years, rows, totals } = coverageMatrix();
+const pct = (n: number, d: number) => (d === 0 ? "0%" : `${Math.round((n / d) * 100)}%`);
+const KIND_SHORT: Record<string, string> = {
+  announced: "A",
+  sanctioned: "S",
+  revised_cost: "R",
+  bid_received: "B",
+  released: "Rel",
+  utilised: "U",
+};
+const STRENGTH_LABEL = { primary: "primary document", news: "news only", press_release: "press release only" };
+const cr = (n: number) => `₹${n.toLocaleString("en-IN")} cr`;
+---
+
+<Base title="Data coverage">
+  <h1>Data coverage</h1>
+  <p>
+    Which years we have figures for, project by project. Every hatched cell below is a gap: a
+    year in which the project existed but we have not yet found a sourced figure for it.
+    Showing the gaps is deliberate. "No data" is a finding, not a blank (see{" "}
+    <a href="/about-the-data">about the data</a>).
+  </p>
+
+  <div class="stat-row">
+    <div class="card stat">
+      <span class="stat-value">{pct(totals.withFigure, totals.projectYears)}</span>
+      <span class="stat-label">
+        of project-years since FY{BACKFILL_START_FY} have at least one figure
+        ({totals.withFigure} of {totals.projectYears})
+      </span>
+    </div>
+    <div class="card stat">
+      <span class="stat-value">{pct(totals.withPrimary, totals.projectYears)}</span>
+      <span class="stat-label">backed by a primary document ({totals.withPrimary})</span>
+    </div>
+    <div class="card stat">
+      <span class="stat-value">{totals.primarySources} / {totals.sources}</span>
+      <span class="stat-label">sources are primary documents</span>
+    </div>
+    <div class="card stat">
+      <span class="stat-value">{totals.archivedSources} / {totals.sources}</span>
+      <span class="stat-label">sources have an archived copy</span>
+    </div>
+  </div>
+
+  <div class="legend" aria-label="Legend">
+    <span><i class="swatch cell-primary"></i>Primary document</span>
+    <span><i class="swatch cell-news"></i>News only</span>
+    <span><i class="swatch cell-press_release"></i>Press release only</span>
+    <span><i class="swatch cell-gap"></i>No figure found yet</span>
+    <span><i class="swatch cell-na"></i>Before the project's first record</span>
+    <span class="legend-kinds">
+      A announced · S sanctioned · R revised cost · B bid · Rel released · U utilised
+    </span>
+  </div>
+
+  <div class="card table-card coverage-scroll">
+    <table class="coverage">
+      <thead>
+        <tr>
+          <th scope="col" class="project-col">Project</th>
+          {years.map((fy) => <th scope="col" class={fy < BACKFILL_START_FY ? "pre-window" : ""}>{fy}</th>)}
+        </tr>
+      </thead>
+      <tbody>
+        {
+          rows.map(({ project, cells }) => (
+            <tr>
+              <th scope="row" class="project-col">
+                <a href={`/projects/${project.id}`}>{project.name}</a>
+                <span class="agency">{agencyLabel(project)}</span>
+              </th>
+              {cells.map((c) => {
+                if (!c.applicable && c.entries.length === 0) {
+                  return <td class="cell-na" title={`${c.fiscalYear}: before this project's first record`}></td>;
+                }
+                if (c.entries.length === 0) {
+                  return <td class="cell-gap" title={`${c.fiscalYear}: no figure found yet`}></td>;
+                }
+                const kinds = [...new Set(c.entries.map((m) => KIND_SHORT[m.kind]))].join(" ");
+                const detail = c.entries.map((m) => `${m.kind.replace(/_/g, " ")} ${cr(m.amount_cr)} (as of ${m.as_of})`).join("\n");
+                return (
+                  <td class={`cell-${c.strength}`} title={`${c.fiscalYear} · ${STRENGTH_LABEL[c.strength!]}\n${detail}`}>
+                    {kinds}
+                  </td>
+                );
+              })}
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <p class="footnote">
+    Figures are grouped by the fiscal year recorded on each entry. Hover or long-press a cell
+    for its amounts. Want to fill a gap? See the{" "}
+    <a href="https://github.com/littlemissbot/namma-blr/blob/master/CONTRIBUTING.md">contributor checklist</a>.
+  </p>
+</Base>
+
+<style>
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    gap: 0.75rem;
+    margin: 1.25rem 0;
+  }
+  .stat { display: flex; flex-direction: column; gap: 0.25rem; padding: 0.9rem 1rem; }
+  .stat-value { font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; }
+  .stat-label { font-size: 0.82rem; color: var(--ink-muted); }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.1rem;
+    font-size: 0.8rem;
+    color: var(--ink-muted);
+    margin-bottom: 0.75rem;
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+  .swatch { display: inline-block; width: 0.9rem; height: 0.9rem; border: 1px solid var(--rule-strong); }
+  .legend-kinds { flex-basis: 100%; }
+
+  .coverage-scroll { overflow-x: auto; padding: 0; }
+  .coverage { border-collapse: collapse; font-size: 0.78rem; min-width: 100%; }
+  .coverage th, .coverage td { border: 1px solid var(--rule); padding: 0.35rem 0.4rem; text-align: center; }
+  .coverage thead th { font-weight: 600; white-space: nowrap; color: var(--ink-muted); }
+  .coverage thead th.pre-window { opacity: 0.6; }
+  .project-col {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--card-bg);
+    text-align: left !important;
+    min-width: 11rem;
+    max-width: 16rem;
+  }
+  .project-col a { font-weight: 600; text-decoration: none; }
+  .project-col a:hover { text-decoration: underline; }
+  .agency { display: block; font-size: 0.72rem; font-weight: 400; color: var(--ink-muted); }
+  .coverage td { font-weight: 600; min-width: 2.6rem; }
+
+  .cell-primary { background: var(--status-complete-bg); color: var(--status-complete); }
+  .cell-news { background: var(--status-progress-bg); color: var(--status-progress); }
+  .cell-press_release { background: var(--status-stalled-bg); color: var(--status-stalled); }
+  .cell-gap {
+    background: repeating-linear-gradient(135deg, transparent 0 4px, var(--rule) 4px 5px);
+  }
+  .cell-na { background: var(--paper-raised); }
+  .footnote { font-size: 0.82rem; color: var(--ink-muted); margin-top: 1rem; }
+</style>

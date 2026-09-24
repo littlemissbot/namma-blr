@@ -135,7 +135,7 @@ existing record breaks:
 - [ ] CAG sweep: list the Karnataka audit reports in the window that mention in-scope agencies
 - [ ] Assembly question sweep: metro, PRR, Cauvery Stage 5, suburban rail
 - [ ] First RTI batch: original deadlines for all BMRCL corridors
-- [ ] Coverage matrix page (`/coverage`)
+- [x] Coverage matrix page (`/coverage`)
 - [ ] Add candidate projects, one PR per project, each with a primary source
 
 ## Risks
