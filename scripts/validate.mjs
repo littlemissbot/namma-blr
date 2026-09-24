@@ -4,6 +4,14 @@
 //   - a source with no retrieved_on
 //   - a project with no verified_on
 //   - a confidence value inconsistent with its doc_type
+//   - deadline fields on an event that isn't a deadline_revised event
+//   - a ward code that doesn't exist in that scheme's boundary file
+//     (once data/wards/<scheme>/wards.geojson has been imported)
+// Warns, without failing, on things a reviewer should look at:
+//   - a source with no archive_url (spec §4.2: government URLs rot)
+//   - a deadline_revised event with no new_deadline
+//   - a money_entry whose as_of falls well outside its fiscal_year
+//   - the same figure recorded twice for a project
 // JSON Schema checks (shape/enum/type) run first via Ajv, then the
 // cross-file rules above run against the loaded, valid records.
 
@@ -54,6 +62,7 @@ function loadJsonDir(dirPath) {
 }
 
 let errors = [];
+const warnings = [];
 
 const records = {};
 for (const entity of ENTITIES) {
@@ -137,6 +146,80 @@ for (const { file, record } of records.project) {
       `[project] ${file}: confidence "${record.confidence}" is not supported by any cited source's doc_type (${[...docTypes].join(", ")})`
     );
   }
+}
+
+// Rule: deadline fields belong only on deadline_revised events, and a
+// deadline_revised event should say what the new deadline is (spec §5.3).
+for (const { file, record } of records.event) {
+  const hasDeadline = record.new_deadline !== undefined || record.previous_deadline !== undefined;
+  if (record.type !== "deadline_revised" && hasDeadline) {
+    errors.push(`[event] ${file}: previous_deadline/new_deadline are only allowed on deadline_revised events`);
+  }
+  if (record.type === "deadline_revised" && !record.new_deadline) {
+    warnings.push(`[event] ${file}: deadline_revised event has no new_deadline (leave it out only if the source gives no exact date)`);
+  }
+}
+
+// Rule: every source should have a Wayback snapshot (spec §4.2). Run
+// `npm run archive-sources` to fill these in.
+for (const { file, record } of records.source) {
+  if (!record.archive_url) warnings.push(`[source] ${file}: no archive_url`);
+}
+
+// Rule: a money_entry's as_of should fall within a year either side of its
+// fiscal year (Apr–Mar). Further out usually means a typo in one of them.
+for (const { file, record } of records.money_entry) {
+  const startYear = Number(record.fiscal_year.slice(0, 4));
+  const fyStart = new Date(Date.UTC(startYear - 1, 3, 1));
+  const fyEnd = new Date(Date.UTC(startYear + 2, 2, 31));
+  const asOf = new Date(record.as_of);
+  if (asOf < fyStart || asOf > fyEnd) {
+    warnings.push(`[money_entry] ${file}: as_of ${record.as_of} is more than a year outside fiscal_year ${record.fiscal_year}`);
+  }
+}
+
+// Rule: the same figure (project, kind, amount, as_of) recorded twice is
+// usually one document entered twice. Conflicting figures are fine (P6);
+// identical ones need a look.
+const seenFigures = new Map();
+for (const { file, record } of records.money_entry) {
+  const key = [record.project_id, record.kind, record.amount_cr, record.as_of].join("|");
+  if (seenFigures.has(key)) {
+    warnings.push(`[money_entry] ${file}: same project/kind/amount/as_of as ${seenFigures.get(key)}`);
+  } else {
+    seenFigures.set(key, file);
+  }
+}
+
+// Rule: ward codes must resolve against the imported boundary file for their
+// scheme. The schema already checks the code format; until a scheme's
+// boundaries are imported (docs/plans/02) this check is skipped for it.
+const wardCodes = new Map(); // scheme -> Set(code)
+for (const { record } of records.project) {
+  for (const code of record.wards) {
+    const scheme = code.split(":")[0];
+    if (!wardCodes.has(scheme)) {
+      const path = join(dataDir, "wards", scheme, "wards.geojson");
+      wardCodes.set(
+        scheme,
+        existsSync(path)
+          ? new Set(JSON.parse(readFileSync(path, "utf8")).features.map((f) => f.properties.code))
+          : null
+      );
+    }
+  }
+}
+for (const { file, record } of records.project) {
+  for (const code of record.wards) {
+    const known = wardCodes.get(code.split(":")[0]);
+    if (known && !known.has(code)) errors.push(`[project] ${file}: ward "${code}" not found in its boundary file`);
+  }
+}
+
+if (warnings.length > 0) {
+  console.warn(`\n${warnings.length} warning(s):\n`);
+  for (const w of warnings) console.warn(" - " + w);
+  console.warn("");
 }
 
 if (errors.length > 0) {

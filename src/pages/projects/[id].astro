@@ -149,7 +149,13 @@ const slippage = slippageMonths(project);
               {events.map((e) => (
                 <li>
                   <span class="timeline-date">{e.date}</span>
-                  {e.summary} <a href={`#source-${sourceRef(e.source_id)}`}>[{sourceRef(e.source_id)}]</a>
+                  {e.summary}
+                  {e.new_deadline && (
+                    <span class="timeline-deadline">
+                      Deadline: {e.previous_deadline ? `${e.previous_deadline} → ` : ""}{e.new_deadline}
+                    </span>
+                  )}{" "}
+                  <a href={`#source-${sourceRef(e.source_id)}`}>[{sourceRef(e.source_id)}]</a>
                 </li>
               ))}
             </ul>
@@ -283,6 +289,7 @@ const slippage = slippageMonths(project);
     background: var(--ink-muted);
   }
   .timeline-date { font-weight: 600; display: block; font-size: 0.85rem; color: var(--ink-muted); }
+  .timeline-deadline { display: block; font-size: 0.85rem; font-weight: 600; }
 
   /* Source ledger — a deliberately sharp-cornered, high-contrast box: the one
      place on the page that looks like evidence filed in a case, not a card. */

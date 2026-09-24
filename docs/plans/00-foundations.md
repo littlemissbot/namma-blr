@@ -76,9 +76,9 @@ Plan 3. Set up the domain (`nammablr.org`) here.
 - [ ] Decide backfill threshold
 - [ ] (Good to have) Decide publisher of record
 - [ ] (Good to have) Decide Kannada at launch
-- [ ] Schema additions PR (event types, deadline fields, budget_head, BBMP, basis fields)
-- [ ] `archive-sources` script
+- [x] Schema additions PR (event types, deadline fields, budget_head, BBMP, basis fields)
+- [x] `archive-sources` script (+ weekly workflow)
 - [ ] `new-record` scaffolding script
-- [ ] Validator additions
-- [ ] GitHub Actions: validate + build on PR
-- [ ] CONTRIBUTING.md
+- [x] Validator additions
+- [x] GitHub Actions: validate + build on PR
+- [x] CONTRIBUTING.md

@@ -1,0 +1,40 @@
+name: Archive sources
+
+# Fills in archive_url for any source that lacks one (spec §4.2) and opens a
+# PR with the result. Runs weekly and on demand (Actions tab -> Run workflow).
+#
+# Needs: Settings -> Actions -> General -> "Allow GitHub Actions to create and
+# approve pull requests". Optional repo secrets ARCHIVE_ORG_ACCESS_KEY and
+# ARCHIVE_ORG_SECRET_KEY (https://archive.org/account/s3.php) make captures
+# more reliable.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 2 * * 1" # Mondays 08:00 IST
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/archive-sources.mjs --save
+        env:
+          ARCHIVE_ORG_ACCESS_KEY: ${{ secrets.ARCHIVE_ORG_ACCESS_KEY }}
+          ARCHIVE_ORG_SECRET_KEY: ${{ secrets.ARCHIVE_ORG_SECRET_KEY }}
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          branch: bot/archive-sources
+          commit-message: "Archive sources: add Wayback snapshot URLs"
+          title: "Archive sources: add Wayback snapshot URLs"
+          body: |
+            Automated run of `scripts/archive-sources.mjs --save`. Each changed file
+            gains an `archive_url`. Spot-check a few snapshots load the right page
+            before merging.
+          add-paths: data/sources/*.json

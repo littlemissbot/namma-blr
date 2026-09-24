@@ -67,13 +67,25 @@
         }
       ]
     },
+    "geometry_basis": {
+      "enum": ["surveyed", "osm", "approximate", "unknown"],
+      "description": "Where the geometry came from. approximate = a point or line standing in for an unknown alignment; the map must say so (spec §5.1)"
+    },
     "wards": {
       "type": "array",
-      "items": { "type": "string" },
-      "description": "Ward codes the project touches"
+      "items": {
+        "type": "string",
+        "pattern": "^(gba2025:[1-5]-[0-9]+|bbmp243:[0-9]+|bbmp198:[0-9]+)$"
+      },
+      "description": "Scheme-prefixed ward codes the project touches: gba2025:<corporation_id>-<ward_no> (corporation ids 1-5 = Central/North/East/South/West), bbmp243:<ward_no>, bbmp198:<ward_no>. See docs/plans/02-geometry-and-wards.md"
+    },
+    "ward_basis": {
+      "type": "string",
+      "description": "How the wards list was derived, e.g. \"alignment passes within 40 m of the ward\""
     },
     "corporation": {
-      "enum": ["Central", "East", "North", "South", "West", "outside_GBA"]
+      "enum": ["Central", "East", "North", "South", "West", "outside_GBA", "BBMP"],
+      "description": "GBA corporation, outside_GBA, or BBMP for records that predate the 2025 GBA restructuring"
     },
     "confidence": { "enum": ["high", "medium", "low"] },
     "verified_on": {

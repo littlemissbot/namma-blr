@@ -63,7 +63,25 @@ Runs before every `npm run build`. Enforces spec §8.4 mechanically:
 - a project's `confidence` is consistent with the `doc_type` of the sources backing it
   (see the doc_type → confidence mapping in spec §3.4/§4.1)
 
-A build with invalid or under-sourced data fails.
+- deadline fields appear only on `deadline_revised` events
+- ward codes resolve against the imported boundary file for their scheme (once
+  `data/wards/<scheme>/wards.geojson` exists)
+
+A build with invalid or under-sourced data fails. The validator also **warns**, without
+failing, about sources with no archive snapshot, `deadline_revised` events with no
+`new_deadline`, figures whose `as_of` is well outside their `fiscal_year`, and
+duplicate figures.
+
+CI runs the validator and build on every PR (`.github/workflows/ci.yml`).
+
+## Archiving sources
+
+```sh
+npm run archive-sources             # use existing Wayback snapshots
+npm run archive-sources -- --save   # also capture missing ones
+```
+
+A weekly workflow (`.github/workflows/archive-sources.yml`) does the same and opens a PR.
 
 ## Site
 
@@ -122,7 +140,8 @@ each, is in [`docs/ROADMAP.md`](./docs/ROADMAP.md).
 
 ## Contributing
 
-Follow the collection workflow in spec §4.4: locate the primary document → extract
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the data-PR checklist. In short: follow
+the collection workflow in spec §4.4: locate the primary document → extract
 figures with page references → snapshot the URL (Wayback) → record `as_of` and
 `retrieved_on` → set `confidence` from `doc_type` → flag any conflict with an existing
 figure in `notes` rather than overwriting it. Run `npm run validate` before opening a
