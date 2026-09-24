@@ -86,6 +86,10 @@ corrections log.
 
 ## Build phases (spec §9)
 
+The current roadmap, which breaks these phases into goals with a plan of action for
+each, is in [`docs/ROADMAP.md`](./docs/ROADMAP.md).
+
+
 1. **Metro only.** Table + project pages, no map. *(Underway — broadened to 7
    agencies ahead of schedule; map deliberately not started yet, per the spec's own
    warning that thin data looks falsely authoritative on a map.)*
