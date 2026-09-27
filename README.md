@@ -99,10 +99,19 @@ npm run build     # validates, then builds to ./dist
 npm run preview   # serve the built ./dist locally
 ```
 
-Pages: a homepage with live-computed totals and a filterable case-file grid, a
-sortable/filterable project table with CSV/JSON export, per-project pages with a
-money timeline and numbered source ledger, an about/disclaimer page, and a public
-corrections log.
+Pages (four in the nav, each with one job):
+
+- **Home** (`/`): city overview numbers, stand-out facts, search, and the latest updates.
+- **Projects** (`/projects`): one filterable, sortable list (a table on desktop, cards on
+  phones) with CSV/JSON export; `/projects/<id>` tells each project's story in one merged
+  timeline of figures and events, with numbered sources.
+- **Map (beta)** (`/map`): project lines and ward lookup.
+- **Updates** (`/updates`): developments, corrections and quarterly notes in one feed, with RSS.
+- **About** (`/about`): the disclaimer, confidence levels, the data-quality grid, the update
+  schedule and open-data links.
+
+Older URLs (`/changes`, `/changelog`, `/corrections`, `/coverage`, `/about-the-data`)
+redirect to their new homes (see `astro.config.mjs`).
 
 ## Build phases (spec §9)
 

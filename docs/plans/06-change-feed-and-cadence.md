@@ -9,8 +9,8 @@ when it's missed.
 
 ## Feed
 
-- `/changes`: all events in reverse date order, filterable by agency, category
-  and ward.
+- `/updates`: all events, corrections and quarterly notes in reverse date order,
+  filterable by type and agency (the old `/changes` redirects here).
 - `/changes.xml` (RSS) and `/changes.json`, so journalists and other civic
   projects can subscribe.
 - Per-project and per-ward feeds, which come free from the same endpoint.
@@ -27,15 +27,15 @@ when it's missed.
   `verified_on` falls before the window starts.
 - A weekly job (warn-only) checks each source URL for link rot and runs
   `archive-sources` for anything new.
-- A changelog lives at `/changelog`, one entry per sweep, naming what changed
+- Quarterly notes appear under `/updates?type=sweep`, one entry per sweep, naming what changed
   and **what couldn't be verified** (§6.4 step 5).
 - The site already has `isStale()` and `nextUpdateDue()` in `src/lib/data.ts`.
   Make sure every page shows "updated quarterly · next update due [date]".
 
 ## Issues to open
 
-- [x] `/changes` page + RSS + JSON
+- [x] Updates feed + RSS + JSON
 - [ ] Git-history-derived "record updated" entries
 - [x] Scheduled "Quarterly sweep" issue workflow
 - [ ] Weekly link-rot check
-- [x] `/changelog` page (first entry comes with the October 2026 sweep)
+- [x] Quarterly notes in the Updates feed (first entry comes with the October 2026 sweep)

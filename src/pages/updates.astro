@@ -1,0 +1,229 @@
+---
+import Base from "../layouts/Base.astro";
+import { label } from "../i18n";
+import { getChanges, getCorrections, getProject, getSource, agencyLabel, nextUpdateDue } from "../lib/data";
+
+// One feed for everything that changes on the site: developments on projects,
+// corrections to our own records (spec §6.5), and quarterly sweep notes (§6.4).
+interface SweepEntry {
+  frontmatter: { date: string; window: string };
+  Content: any;
+}
+const sweepModules = import.meta.glob<SweepEntry>("/content/changelog/*.md", { eager: true });
+const sweeps = Object.entries(sweepModules)
+  .filter(([path]) => !path.endsWith("/README.md"))
+  .map(([, m]) => m);
+
+type Item =
+  | { type: "development"; date: string; key: string; change: ReturnType<typeof getChanges>[number] }
+  | { type: "correction"; date: string; key: string; correction: ReturnType<typeof getCorrections>[number] }
+  | { type: "sweep"; date: string; key: string; sweep: SweepEntry };
+
+const items: Item[] = [
+  ...getChanges().map((change) => ({ type: "development" as const, date: change.event.date, key: change.id, change })),
+  ...getCorrections().map((correction) => ({ type: "correction" as const, date: correction.date, key: correction.id, correction })),
+  ...sweeps.map((sweep) => ({ type: "sweep" as const, date: String(sweep.frontmatter.date), key: sweep.frontmatter.window, sweep })),
+].sort((a, b) => b.date.localeCompare(a.date));
+
+const years = [...new Set(items.map((i) => i.date.slice(0, 4)))];
+const counts = {
+  development: items.filter((i) => i.type === "development").length,
+  correction: items.filter((i) => i.type === "correction").length,
+  sweep: items.filter((i) => i.type === "sweep").length,
+};
+const agencies = [
+  ...new Set(items.flatMap((i) => (i.type === "development" ? [i.change.project.agency] : i.type === "correction" ? [getProject(i.correction.project_id)?.agency ?? ""] : []))),
+]
+  .filter(Boolean)
+  .sort();
+const agencyOf = (i: Item) =>
+  i.type === "development" ? i.change.project.agency : i.type === "correction" ? getProject(i.correction.project_id)?.agency ?? "" : "";
+const nextDue = nextUpdateDue().toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+const date = (d: string) =>
+  new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+const monthYear = (d: string) => new Date(d).toLocaleDateString("en-IN", { month: "short", year: "numeric", timeZone: "UTC" });
+---
+
+<Base title="Updates">
+  <h1>Updates</h1>
+  <p class="intro">
+    Everything that has changed, newest first: developments on projects, corrections to our own records, and the
+    notes from each quarterly re-check. Next quarterly re-check due {nextDue}. Subscribe:{" "}
+    <a href="/changes.xml">RSS</a> · <a href="/changes.json">JSON</a>
+  </p>
+
+  <div class="filter-bar" role="search" aria-label="Filter updates">
+    <div class="type-tabs" role="radiogroup" aria-label="Type of update">
+      <label><input type="radio" name="type" value="" checked /> All <span>{items.length}</span></label>
+      <label><input type="radio" name="type" value="development" /> Developments <span>{counts.development}</span></label>
+      <label><input type="radio" name="type" value="correction" /> Corrections <span>{counts.correction}</span></label>
+      <label><input type="radio" name="type" value="sweep" /> Quarterly notes <span>{counts.sweep}</span></label>
+    </div>
+    <label>
+      <span>Agency</span>
+      <select id="u-agency">
+        <option value="">All</option>
+        {agencies.map((a) => <option value={a}>{a === "corporation" ? "City corporations" : a}</option>)}
+      </select>
+    </label>
+  </div>
+
+  <p id="u-empty-sweep" class="empty-note" hidden>
+    No quarterly re-check has been published yet. The first is due {nextDue}; its notes will say what changed and what
+    couldn't be verified.
+  </p>
+
+  {
+    years.map((year) => (
+      <section class="year" data-year={year}>
+        <h2>{year}</h2>
+        <ol class="feed">
+          {items
+            .filter((i) => i.date.startsWith(year))
+            .map((item) => (
+              <li class={`item item-${item.type}`} data-type={item.type} data-agency={agencyOf(item)} id={item.type === "correction" ? item.correction.id : undefined}>
+                <time datetime={item.date}>{date(item.date)}</time>
+                <div>
+                  {item.type === "development" && (
+                    <>
+                      <p class="item-head">
+                        <span class="tag">{label("event_type", item.change.event.type)}</span>
+                        <a href={`/projects/${item.change.project.id}`}>{item.change.project.name}</a>
+                        <span class="muted"> · {agencyLabel(item.change.project)}</span>
+                      </p>
+                      <p>{item.change.event.summary}</p>
+                      {item.change.event.new_deadline && (
+                        <p class="muted strong">
+                          Deadline: {item.change.event.previous_deadline ? `${monthYear(item.change.event.previous_deadline)} → ` : ""}
+                          {monthYear(item.change.event.new_deadline)}
+                        </p>
+                      )}
+                      {item.change.source && (
+                        <p class="muted small">
+                          Source: <a href={item.change.source.url} target="_blank" rel="noopener">{item.change.source.publisher}</a>
+                          {item.change.source.archive_url && <> (<a href={item.change.source.archive_url} target="_blank" rel="noopener">archived</a>)</>}
+                          {" "}· {label("doc_type", item.change.source.doc_type)}
+                        </p>
+                      )}
+                    </>
+                  )}
+                  {item.type === "correction" && (() => {
+                    const project = getProject(item.correction.project_id);
+                    const source = getSource(item.correction.resolved_by_source_id);
+                    return (
+                      <>
+                        <p class="item-head">
+                          <span class="tag tag-correction">Correction {item.correction.id}</span>
+                          {project && <a href={`/projects/${project.id}`}>{project.name}</a>}
+                        </p>
+                        <p>{item.correction.now}</p>
+                        <p class="muted small">Previously: {item.correction.was}</p>
+                        <p class="muted small">
+                          Raised by {item.correction.raised_by}
+                          {source && <>; resolved using <a href={source.url} target="_blank" rel="noopener">{source.publisher}</a></>}
+                        </p>
+                      </>
+                    );
+                  })()}
+                  {item.type === "sweep" && (
+                    <>
+                      <p class="item-head"><span class="tag tag-sweep">Quarterly re-check</span> <strong>{item.sweep.frontmatter.window}</strong></p>
+                      <div class="sweep-body"><item.sweep.Content /></div>
+                    </>
+                  )}
+                </div>
+              </li>
+            ))}
+        </ol>
+      </section>
+    ))
+  }
+  <p id="u-empty" class="filter-empty" hidden>No updates match these filters.</p>
+
+  <section class="card report" id="report">
+    <h2>Found something wrong?</h2>
+    <p>
+      Write to [email] with the project name and what you believe is correct. Every report is checked against our
+      sources; where we were wrong, the fix is published here as a dated correction, not quietly edited away.
+    </p>
+  </section>
+</Base>
+
+<style>
+  .intro { color: var(--ink-muted); }
+  .type-tabs { display: flex; flex-wrap: wrap; gap: 0.4rem; flex: 1 1 100%; }
+  .type-tabs label {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.88rem;
+    color: var(--ink);
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    background: var(--paper-raised);
+  }
+  .type-tabs label:has(input:checked) { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .type-tabs label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .type-tabs input { position: absolute; opacity: 0; pointer-events: none; }
+  .type-tabs span { opacity: 0.7; font-size: 0.8rem; }
+
+  .year h2 { margin: 2rem 0 0.5rem; }
+  .feed { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule-strong); }
+  .item { display: grid; grid-template-columns: 7.5rem 1fr; gap: 1rem; padding: 0.9rem 0; border-bottom: 1px solid var(--rule); }
+  .item time { font-size: 0.85rem; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+  .item p { margin: 0.2rem 0 0; }
+  .item-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.2rem 0.5rem; }
+  .item-head a { font-weight: 600; text-decoration: none; }
+  .item-head a:hover { text-decoration: underline; }
+  .tag { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-muted); }
+  .tag-correction { color: var(--accent); }
+  .tag-sweep { color: var(--status-complete); }
+  .muted { color: var(--ink-muted); }
+  .small { font-size: 0.82rem; }
+  .strong { font-weight: 600; }
+  .item:target { background: var(--status-progress-bg); }
+  .empty-note { font-size: 0.92rem; color: var(--ink-muted); margin-top: 1rem; }
+  .report { margin-top: 2.5rem; }
+  .report h2 { margin-top: 0; font-size: 1.15rem; }
+  @media (max-width: 40rem) {
+    .item { grid-template-columns: 1fr; gap: 0.1rem; }
+  }
+</style>
+
+<script>
+  const radios = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="type"]'));
+  const agency = document.getElementById("u-agency") as HTMLSelectElement;
+  const items = Array.from(document.querySelectorAll<HTMLLIElement>("li.item"));
+  const sections = Array.from(document.querySelectorAll<HTMLElement>("section.year"));
+  const empty = document.getElementById("u-empty")!;
+  const emptySweep = document.getElementById("u-empty-sweep")!;
+
+  const params = new URLSearchParams(location.search);
+  const startType = params.get("type") ?? "";
+  for (const r of radios) r.checked = r.value === startType;
+  if (!radios.some((r) => r.checked)) radios[0].checked = true;
+  if (params.get("agency")) agency.value = params.get("agency")!;
+
+  function apply() {
+    const type = radios.find((r) => r.checked)?.value ?? "";
+    let visible = 0;
+    for (const li of items) {
+      // Agency applies to developments and corrections; quarterly notes are city-wide.
+      const show = (!type || li.dataset.type === type) && (!agency.value || li.dataset.agency === agency.value);
+      li.hidden = !show;
+      if (show) visible++;
+    }
+    for (const s of sections) s.hidden = !s.querySelector("li.item:not([hidden])");
+    emptySweep.hidden = !(type === "sweep" && visible === 0);
+    empty.hidden = visible !== 0 || type === "sweep";
+    const next = new URLSearchParams();
+    if (type) next.set("type", type);
+    if (agency.value) next.set("agency", agency.value);
+    history.replaceState(null, "", next.toString() ? `?${next}${location.hash}` : location.pathname + location.hash);
+  }
+  for (const el of [...radios, agency]) el.addEventListener("input", apply);
+  apply();
+</script>

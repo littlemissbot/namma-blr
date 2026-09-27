@@ -5,19 +5,17 @@
   },
   "nav": {
     "projects": "Projects",
-    "changes": "What changed",
-    "coverage": "Coverage",
-    "about": "About the data",
-    "corrections": "Corrections",
-    "map": "Map (beta)"
+    "map": "Map (beta)",
+    "updates": "Updates",
+    "about": "About"
   },
   "footer": {
-    "disclaimer": "This site compiles publicly available information about infrastructure projects in Bengaluru. Every figure is shown with its source and the date it was recorded. An allocation is not evidence that money was spent, and a delay is not evidence of wrongdoing. We do not allege misconduct by any individual, official, department or contractor.",
-    "disclaimer_link": "Full disclaimer and sourcing",
-    "corrections_link": "Corrections log",
-    "cadence": "Updated quarterly, in January, April, July and October. Next sweep due {date}. Each project also shows the date it was last checked.",
-    "changelog_link": "Changelog",
+    "disclaimer": "Public information on Bengaluru infrastructure projects, each figure with its source and date. An allocation is not evidence that money was spent, and a delay is not evidence of wrongdoing. We do not allege misconduct by anyone.",
+    "about_link": "About the data",
+    "corrections_link": "Corrections",
     "rss_link": "RSS",
+    "csv_link": "Download CSV",
+    "cadence": "Updated quarterly · next sweep due {date}",
     "ticker": "Updated quarterly. Next sweep due {date}."
   },
   "common": {

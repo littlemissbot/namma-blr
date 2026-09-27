@@ -214,11 +214,15 @@ export function partFigureCount(projectId: string): number {
   return getMoneyEntries(projectId).filter((m) => !isWholeProject(m)).length;
 }
 
-/** Overrun % vs. the original sanctioned amount, or null when either figure is missing. */
+/**
+ * Change % from the original sanctioned amount to the latest whole-project cost.
+ * Null unless there are two different figures to compare: a project with a
+ * single figure has no measured change, which is not the same as "0%".
+ */
 export function overrunPct(projectId: string): number | null {
   const original = originalSanctionedCost(projectId);
   const latest = latestCost(projectId);
-  if (!original || !latest || original.amount_cr === 0) return null;
+  if (!original || !latest || original === latest || original.amount_cr === 0) return null;
   return ((latest.amount_cr - original.amount_cr) / original.amount_cr) * 100;
 }
 
@@ -408,4 +412,99 @@ export function statusGroup(status: Project["status"]): "announced" | "sanctione
   if (status === "under_construction" || status === "partially_open") return "progress";
   if (status === "complete") return "complete";
   return "stalled";
+}
+
+/** ₹ crore, Indian digit grouping: 40614 -> "₹40,614 cr". */
+export function formatCr(n: number): string {
+  return `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 2 })} cr`;
+}
+
+/** Signed percentage for a cost change, e.g. "+53.8%". */
+export function formatPct(pct: number): string {
+  return `${pct >= 0 ? "+" : "−"}${Math.abs(pct).toFixed(1)}%`;
+}
+
+/**
+ * The most common confidence level across projects. Showing a badge that is
+ * identical on every row is noise; lists show confidence only where a project
+ * differs from this (P4 is still met on the project page and in exports).
+ */
+export function typicalConfidence(): Confidence {
+  const counts = new Map<Confidence, number>();
+  for (const p of getProjects()) counts.set(p.confidence, (counts.get(p.confidence) ?? 0) + 1);
+  return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "medium";
+}
+
+export function isConfidenceNotable(project: Project): boolean {
+  return project.confidence !== typicalConfidence();
+}
+
+/** Plain-language meaning of each confidence level (spec §3.4 / P4). */
+export const CONFIDENCE_MEANING: Record<Confidence, string> = {
+  high: "backed by an official document (budget, audit report, Assembly reply or RTI reply)",
+  medium: "based on news reports or an agency's own report, not yet an official document",
+  low: "based on an announcement only, not yet verified against any document",
+};
+
+/**
+ * The facts a project page leads with, plus a list of what isn't on record
+ * yet, so missing values become one line instead of a grid of "no data".
+ */
+export function projectFacts(project: Project) {
+  const cost = latestCost(project.id);
+  const sanctioned = originalSanctionedCost(project.id);
+  const change = overrunPct(project.id);
+  const slippage = slippageMonths(project);
+  const parts = partFigureCount(project.id);
+  const missing: string[] = [];
+  if (!cost) missing.push(parts > 0 ? "a whole-project cost (only part figures so far)" : "a cost figure");
+  if (!project.sanction_date) missing.push("sanction date");
+  if (!project.original_deadline) missing.push("original deadline");
+  if (!project.current_deadline && project.status !== "complete" && project.status !== "cancelled") missing.push("current deadline");
+  if (!project.pending && project.status !== "complete") missing.push("what's pending");
+  return { cost, sanctioned, change, slippage, parts, missing };
+}
+
+export type TimelineItem =
+  | { kind: "event"; date: string; event: Event }
+  | { kind: "money"; date: string; entry: MoneyEntry };
+
+/** Money figures and events for one project, merged into a single dated story (oldest first). */
+export function projectTimeline(projectId: string): TimelineItem[] {
+  const items: TimelineItem[] = [
+    ...getEvents(projectId).map((event) => ({ kind: "event" as const, date: event.date, event })),
+    ...getMoneyEntries(projectId).map((entry) => ({ kind: "money" as const, date: entry.as_of, entry })),
+  ];
+  // Same date: the event (e.g. "Cabinet approved") reads before the figure it produced.
+  return items.sort((a, b) => a.date.localeCompare(b.date) || (a.kind === b.kind ? 0 : a.kind === "event" ? -1 : 1));
+}
+
+/** Headline facts for the homepage, each the most defensible figure of its kind (P5: facts, not verdicts). */
+export function standoutFacts() {
+  const projects = getProjects();
+  const biggestRise = projects
+    .map((project) => ({ project, pct: overrunPct(project.id) }))
+    .filter((x): x is { project: Project; pct: number } => x.pct !== null && x.pct > 0)
+    .sort((a, b) => b.pct - a.pct)[0];
+  const longestDelay = projects
+    .map((project) => ({ project, months: slippageMonths(project) }))
+    .filter((x): x is { project: Project; months: number } => x.months !== null && x.months > 0)
+    .sort((a, b) => b.months - a.months)[0];
+  return { biggestRise, longestDelay, latest: getChanges()[0] };
+}
+
+/** City-wide totals over projects that have both an original and a later whole-project figure. */
+export function cityTotals() {
+  const projects = getProjects();
+  let withBoth = 0;
+  let sanctioned = 0;
+  let latest = 0;
+  for (const p of projects) {
+    if (overrunPct(p.id) === null) continue;
+    withBoth++;
+    sanctioned += originalSanctionedCost(p.id)!.amount_cr;
+    latest += latestCost(p.id)!.amount_cr;
+  }
+  const withCost = projects.filter((p) => latestCost(p.id)).length;
+  return { projects: projects.length, withCost, withBoth, sanctioned, latest, stale: projects.filter((p) => isStale(p)).length };
 }

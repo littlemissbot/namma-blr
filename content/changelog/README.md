@@ -2,7 +2,7 @@
 
 One Markdown file per quarterly sweep, named `YYYY-MM.md` after the sweep
 window (for example `2026-10.md`). Spec §6.4 step 5: say what changed and
-**what could not be verified**. Files are shown newest first on `/changelog`.
+**what could not be verified**. Entries appear in the Updates feed as "Quarterly notes" (`/updates?type=sweep`).
 
 ```markdown
 ---

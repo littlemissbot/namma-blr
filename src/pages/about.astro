@@ -1,0 +1,224 @@
+---
+import Base from "../layouts/Base.astro";
+import { label } from "../i18n";
+import {
+  coverageMatrix,
+  sourcingHealth,
+  agencyLabel,
+  nextUpdateDue,
+  BACKFILL_START_FY,
+  CONFIDENCE_MEANING,
+  formatCr,
+} from "../lib/data";
+
+const { years, rows, totals } = coverageMatrix();
+const health = sourcingHealth();
+const pct = (n: number, d: number) => (d === 0 ? "0%" : `${Math.round((n / d) * 100)}%`);
+const nextDue = nextUpdateDue().toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+---
+
+<Base title="About the data">
+  <h1>About the data</h1>
+  <p class="lede">
+    A public, sourced record of what Karnataka's agencies have committed to build in Bengaluru. Here is what the
+    figures mean, how sure we are of them, and how complete the record is.
+  </p>
+
+  <nav class="toc" aria-label="On this page">
+    <a href="#what-this-is">What this is</a>
+    <a href="#confidence">Confidence</a>
+    <a href="#data-quality">Data quality</a>
+    <a href="#schedule">Update schedule</a>
+    <a href="#open-data">Open data</a>
+    <a href="#scope">Out of scope</a>
+  </nav>
+
+  <section id="what-this-is">
+    <h2>What this is</h2>
+    <p>
+      This site compiles publicly available information about infrastructure projects in Bengaluru from government
+      budget documents, agency reports, audit reports and published news coverage. Every figure is shown with its
+      source and the date it was recorded.
+    </p>
+    <p>
+      Figures are drawn from official documents and media reports as published. They are not independently audited by
+      us. Budget allocations, sanctioned amounts, funds released and actual expenditure are different things, and we
+      label which is which. An allocation is not evidence that money was spent, and a delay is not evidence of
+      wrongdoing.
+    </p>
+    <p>
+      We do not allege misconduct by any individual, official, department or contractor. Infrastructure delays have
+      many causes, including land acquisition, litigation, clearances, funding, contractor capacity and design changes.
+    </p>
+    <p>
+      If you believe something here is inaccurate, write to [email]. We check every report against our sources and
+      publish a dated correction where warranted; see <a href="/updates?type=correction">corrections</a>.
+    </p>
+  </section>
+
+  <section id="confidence">
+    <h2>How sure we are: confidence</h2>
+    <p>Every project carries a confidence level, based on the strongest document behind its figures:</p>
+    <dl class="fields confidence-list">
+      {(["high", "medium", "low"] as const).map((c) => (
+        <>
+          <dt><span class={`confidence confidence-${c}`}>{label("confidence", c)}</span></dt>
+          <dd>{CONFIDENCE_MEANING[c][0].toUpperCase() + CONFIDENCE_MEANING[c].slice(1)}.</dd>
+        </>
+      ))}
+    </dl>
+    <p>
+      Right now {health.byConfidence.high} projects are high, {health.byConfidence.medium} medium and{" "}
+      {health.byConfidence.low} low confidence. Lists only show the badge where a project differs from the rest; every
+      project page states it.
+    </p>
+  </section>
+
+  <section id="data-quality">
+    <h2>Data quality</h2>
+    <p>
+      Which years we have figures for, project by project. Hatched cells are gaps: years in which a project existed but
+      no sourced figure has been found yet. We show the gaps on purpose.
+    </p>
+
+    <dl class="quality-strip">
+      <div><dt>Project-years since FY{BACKFILL_START_FY} with a figure</dt><dd>{pct(totals.withFigure, totals.projectYears)}</dd><p>{totals.withFigure} of {totals.projectYears}</p></div>
+      <div><dt>…backed by an official document</dt><dd>{pct(totals.withPrimary, totals.projectYears)}</dd><p>{totals.withPrimary} of {totals.projectYears}</p></div>
+      <div><dt>Sources that are official documents</dt><dd>{totals.primarySources} / {totals.sources}</dd><p>the rest are news reports</p></div>
+      <div><dt>Sources with an archived copy</dt><dd>{totals.archivedSources} / {totals.sources}</dd><p>government links break; archives don't</p></div>
+    </dl>
+
+    <div class="legend" aria-label="Legend">
+      <span><i class="swatch cell-primary"></i>Official document</span>
+      <span><i class="swatch cell-news"></i>News only</span>
+      <span><i class="swatch cell-press_release"></i>Press release only</span>
+      <span><i class="swatch cell-gap"></i>No figure found yet</span>
+      <span><i class="swatch cell-na"></i>Before the project's first record</span>
+      <span class="legend-kinds">A announced · S sanctioned · R revised cost · B bid · Rel released · U utilised</span>
+    </div>
+
+    <div class="card coverage-scroll">
+      <table class="coverage">
+        <thead>
+          <tr>
+            <th scope="col" class="project-col">Project</th>
+            {years.map((fy) => <th scope="col" class={fy < BACKFILL_START_FY ? "pre-window" : ""}>{fy}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(({ project, cells }) => (
+            <tr>
+              <th scope="row" class="project-col">
+                <a href={`/projects/${project.id}`}>{project.name}</a>
+                <span class="agency">{agencyLabel(project)}</span>
+              </th>
+              {cells.map((c) => {
+                if (!c.applicable && c.entries.length === 0) return <td class="cell-na" title={`${c.fiscalYear}: before this project's first record`}></td>;
+                if (c.entries.length === 0) return <td class="cell-gap" title={`${c.fiscalYear}: no figure found yet`}></td>;
+                const kinds = [...new Set(c.entries.map((m) => label("kind_short", m.kind)))].join(" ");
+                const detail = c.entries.map((m) => `${label("kind", m.kind)} ${formatCr(m.amount_cr)} (as of ${m.as_of})`).join("\n");
+                return (
+                  <td class={`cell-${c.strength}`} title={`${c.fiscalYear} · ${label("source_strength", c.strength!)}\n${detail}`}>{kinds}</td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p class="footnote">
+      Grouped by the fiscal year recorded on each figure; hover or long-press a cell for amounts. Want to fill a gap? See
+      the <a href="https://github.com/littlemissbot/namma-blr/blob/master/CONTRIBUTING.md">contributor checklist</a>.
+    </p>
+  </section>
+
+  <section id="schedule">
+    <h2>Update schedule</h2>
+    <p>
+      Every project is re-checked each quarter, in January, April, July and October, timed to when the underlying data
+      moves: the Karnataka budget lands in spring, agency annual reports follow, and Assembly sessions produce question
+      replies in batches. <strong>Next re-check: {nextDue}.</strong> Factual fixes are made any time between re-checks.
+      A project not re-checked for two quarters is marked "possibly outdated". Each re-check's notes appear under{" "}
+      <a href="/updates?type=sweep">Updates</a>.
+    </p>
+  </section>
+
+  <section id="open-data">
+    <h2>Open data</h2>
+    <p>
+      The whole dataset is in a public Git repository, one file per record, so every change is auditable. Download the
+      project list as <a href="/projects.csv">CSV</a> or <a href="/projects.json">JSON</a>, or follow updates by{" "}
+      <a href="/changes.xml">RSS</a>. Source code:{" "}
+      <a href="https://github.com/littlemissbot/namma-blr">github.com/littlemissbot/namma-blr</a>.
+    </p>
+    <p>
+      Ward boundaries on the map are from the DataMeet India community (CC BY-SA 2.5 IN) until official files are
+      obtained. Map tiles and project routes are © OpenStreetMap contributors (ODbL).
+    </p>
+  </section>
+
+  <section id="scope">
+    <h2>Out of scope</h2>
+    <ul>
+      <li>Allegations of corruption, or any claim about <em>why</em> a delay happened.</li>
+      <li>Contractor performance rankings.</li>
+      <li>Anything sourced only from social media or unattributed claims.</li>
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .lede { color: var(--ink-muted); font-size: 1.05rem; }
+  .toc { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 1rem 0 0.5rem; }
+  .toc a {
+    font-size: 0.85rem;
+    padding: 0.35rem 0.75rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius-pill);
+    text-decoration: none;
+    color: var(--ink);
+    background: var(--paper-raised);
+  }
+  .toc a:hover { border-color: var(--ink-muted); }
+  section { scroll-margin-top: 1rem; }
+  .confidence-list { max-width: 48rem; align-items: baseline; }
+
+  .quality-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    margin: 1rem 0;
+    border-top: 2px solid var(--ink);
+    border-bottom: 1px solid var(--rule-strong);
+  }
+  .quality-strip > div { padding: 0.8rem 1rem 0.8rem 0; }
+  .quality-strip > div + div { border-left: 1px solid var(--rule); padding-left: 1rem; }
+  .quality-strip dt { font-size: 0.8rem; color: var(--ink-muted); }
+  .quality-strip dd { margin: 0.1rem 0; font-family: var(--font-display); font-weight: 700; font-size: 1.6rem; }
+  .quality-strip p { margin: 0; font-size: 0.8rem; color: var(--ink-muted); }
+  @media (max-width: 30rem) {
+    .quality-strip { grid-template-columns: 1fr 1fr; }
+    .quality-strip > div:nth-child(odd) { border-left: none; padding-left: 0; }
+  }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1.1rem; font-size: 0.8rem; color: var(--ink-muted); margin-bottom: 0.75rem; }
+  .legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+  .swatch { display: inline-block; width: 0.9rem; height: 0.9rem; border: 1px solid var(--rule-strong); }
+  .legend-kinds { flex-basis: 100%; }
+
+  .coverage-scroll { overflow-x: auto; padding: 0; }
+  .coverage { border-collapse: collapse; font-size: 0.78rem; min-width: 100%; }
+  .coverage th, .coverage td { border: 1px solid var(--rule); padding: 0.35rem 0.4rem; text-align: center; }
+  .coverage thead th { font-weight: 600; white-space: nowrap; color: var(--ink-muted); }
+  .coverage thead th.pre-window { opacity: 0.6; }
+  .project-col { position: sticky; left: 0; z-index: 1; background: var(--card-bg); text-align: left !important; min-width: 11rem; max-width: 16rem; }
+  .project-col a { font-weight: 600; text-decoration: none; }
+  .project-col a:hover { text-decoration: underline; }
+  .agency { display: block; font-size: 0.72rem; font-weight: 400; color: var(--ink-muted); }
+  .coverage td { font-weight: 600; min-width: 2.6rem; }
+  .cell-primary { background: var(--status-complete-bg); color: var(--status-complete); }
+  .cell-news { background: var(--status-progress-bg); color: var(--status-progress); }
+  .cell-press_release { background: var(--status-stalled-bg); color: var(--status-stalled); }
+  .cell-gap { background: repeating-linear-gradient(135deg, transparent 0 4px, var(--rule) 4px 5px); }
+  .cell-na { background: var(--paper-raised); }
+  .footnote { font-size: 0.82rem; color: var(--ink-muted); margin-top: 0.75rem; }
+</style>

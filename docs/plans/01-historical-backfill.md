@@ -92,7 +92,7 @@ carries an explicit "no data found" marker. It serves two purposes:
 
 - **Internally,** it shows which backfill work remains and makes a good
   "good first issue" board for contributors.
-- **Publicly,** as `/coverage`, it puts P2 into practice: missing data is shown,
+- **Publicly,** on `/about#data-quality`, it puts P2 into practice: missing data is shown,
   not hidden.
 
 ## Candidate projects to add for 2016–2020
@@ -135,7 +135,7 @@ existing record breaks:
 - [ ] CAG sweep: list the Karnataka audit reports in the window that mention in-scope agencies
 - [ ] Assembly question sweep: metro, PRR, Cauvery Stage 5, suburban rail
 - [ ] First RTI batch: original deadlines for all BMRCL corridors
-- [x] Coverage matrix page (`/coverage`)
+- [x] Coverage matrix (now the data-quality section of `/about`)
 - [ ] Add candidate projects, one PR per project, each with a primary source
 
 ## Risks
@@ -143,7 +143,7 @@ existing record breaks:
 - **Scope creep into BBMP ward-level works.** Thousands of small works would
   swamp the dataset. For now, add only projects above a threshold (proposal:
   ₹50 cr) or ones with notable public interest. Record the threshold in
-  `about-the-data`.
+  `/about`.
 - **Manual effort.** Government portals serve PDFs badly to scripts (§4.2).
   Plan for manual extraction, and treat any scraper as a helper that saves
   time rather than as the source of truth.

@@ -124,7 +124,7 @@ const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWit
       }
       .site-footer p { max-width: none; }
       .site-footer a { color: var(--ink-muted); text-decoration: underline; }
-      .cadence-line { margin-top: 0.5rem; }
+      .footer-links { display: flex; flex-wrap: wrap; gap: 0.35rem 1.1rem; margin-top: 0.6rem; }
     </style>
   </head>
   <body>
@@ -138,13 +138,11 @@ const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWit
     <header class="site-header">
       <div class="wrap">
         <a class="wordmark" href="/">Namma<span>BLR</span></a>
-        <nav class="site-nav">
+        <nav class="site-nav" aria-label="Main">
           <a href="/projects" aria-current={isActive("/projects") ? "page" : undefined}>{t("nav.projects")}</a>
           <a href="/map" aria-current={isActive("/map") ? "page" : undefined}>{t("nav.map")}</a>
-          <a href="/changes" aria-current={isActive("/changes") ? "page" : undefined}>{t("nav.changes")}</a>
-          <a href="/coverage" aria-current={isActive("/coverage") ? "page" : undefined}>{t("nav.coverage")}</a>
-          <a href="/about-the-data" aria-current={isActive("/about-the-data") ? "page" : undefined}>{t("nav.about")}</a>
-          <a href="/corrections" aria-current={isActive("/corrections") ? "page" : undefined}>{t("nav.corrections")}</a>
+          <a href="/updates" aria-current={isActive("/updates") ? "page" : undefined}>{t("nav.updates")}</a>
+          <a href="/about" aria-current={isActive("/about") ? "page" : undefined}>{t("nav.about")}</a>
         </nav>
       </div>
     </header>
@@ -153,13 +151,13 @@ const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWit
     </main>
     <footer class="site-footer">
       <div class="wrap">
-        <p>
-          {t("footer.disclaimer")} <a href="/about-the-data">{t("footer.disclaimer_link")}</a> ·{" "}
-          <a href="/corrections">{t("footer.corrections_link")}</a>
-        </p>
-        <p class="cadence-line">
-          {t("footer.cadence", { date: nextDueLabel })} <a href="/changelog">{t("footer.changelog_link")}</a> ·{" "}
+        <p>{t("footer.disclaimer")}</p>
+        <p class="footer-links">
+          <a href="/about">{t("footer.about_link")}</a>
+          <a href="/updates?type=correction">{t("footer.corrections_link")}</a>
           <a href="/changes.xml">{t("footer.rss_link")}</a>
+          <a href="/projects.csv">{t("footer.csv_link")}</a>
+          <span>{t("footer.cadence", { date: nextDueLabel })}</span>
         </p>
       </div>
     </footer>

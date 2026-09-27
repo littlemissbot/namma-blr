@@ -266,6 +266,7 @@ const STATUS_GROUPS = [
       const f = projects.features.find((f: any) => f.properties.id === wanted);
       if (f) showProject(f.properties);
     }
+    if (params.get("locate") === "1") locateBtn.click();
     const ward = params.get("ward");
     if (ward && /^bbmp(243|198):\d+$/.test(ward)) {
       const scheme = ward.split(":")[0] as WardScheme;

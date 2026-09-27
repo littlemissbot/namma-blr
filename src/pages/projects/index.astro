@@ -1,271 +1,273 @@
 ---
 import Base from "../../layouts/Base.astro";
 import { label } from "../../i18n";
-import { getProjects, latestCost, overrunPct, slippageMonths, isStale, getProjectSourceIds, agencyLabel } from "../../lib/data";
+import {
+  getProjects,
+  latestCost,
+  overrunPct,
+  slippageMonths,
+  isStale,
+  agencyLabel,
+  isConfidenceNotable,
+  formatCr,
+  formatPct,
+} from "../../lib/data";
 
-const projects = getProjects();
-const rows = projects.map((p) => ({
+const rows = getProjects().map((p) => ({
   project: p,
   cost: latestCost(p.id),
-  overrun: overrunPct(p.id),
-  slippage: slippageMonths(p),
+  change: overrunPct(p.id),
+  delay: slippageMonths(p),
   stale: isStale(p),
-  sources: getProjectSourceIds(p.id).length,
+  notable: isConfidenceNotable(p),
 }));
 
-const uniqueSorted = (values: string[]) => [...new Set(values)].sort();
-const agencies = uniqueSorted(rows.map((r) => r.project.agency));
-const categories = uniqueSorted(rows.map((r) => r.project.category));
-const statuses = uniqueSorted(rows.map((r) => r.project.status));
-const confidences = ["high", "medium", "low"].filter((c) => rows.some((r) => r.project.confidence === c));
-
+const options = (values: string[]) => [...new Set(values)].sort();
+const agencies = options(rows.map((r) => r.project.agency));
+const categories = options(rows.map((r) => r.project.category));
+const statuses = options(rows.map((r) => r.project.status));
+const confidences = options(rows.map((r) => r.project.confidence));
+const agencyText = (a: string) => (a === "corporation" ? "City corporations" : a);
 ---
 
 <Base title="Projects">
-  <h1>Projects</h1>
-  <p>
-    Every tracked project, one row each. Filter and sort below — export always covers the
-    full table, not just what's currently shown: <a href="/projects.csv">CSV</a> or{" "}
-    <a href="/projects.json">JSON</a>.
-  </p>
+  <div class="page-head">
+    <h1>Projects</h1>
+    <p>
+      All {rows.length} tracked projects. Tap one for its full history and sources. Download:{" "}
+      <a href="/projects.csv">CSV</a> · <a href="/projects.json">JSON</a>
+    </p>
+  </div>
 
-  {
-    rows.length === 0 ? (
-      <p>No projects published yet. See <a href="/about-the-data">how this site sources its data</a>.</p>
-    ) : (
-      <>
-        <div class="filter-bar" role="search" aria-label="Filter projects">
-          <label>
-            <span>Search</span>
-            <input type="text" id="f-search" placeholder="Project or agency…" autocomplete="off" />
-          </label>
-          <label>
-            <span>Agency</span>
-            <select id="f-agency">
-              <option value="">All</option>
-              {agencies.map((a) => <option value={a}>{a}</option>)}
-            </select>
-          </label>
-          <label>
-            <span>Category</span>
-            <select id="f-category">
-              <option value="">All</option>
-              {categories.map((c) => <option value={c}>{label("category", c)}</option>)}
-            </select>
-          </label>
-          <label>
-            <span>Status</span>
-            <select id="f-status">
-              <option value="">All</option>
-              {statuses.map((s) => <option value={s}>{label("status", s)}</option>)}
-            </select>
-          </label>
-          <label>
-            <span>Confidence</span>
-            <select id="f-confidence">
-              <option value="">All</option>
-              {confidences.map((c) => <option value={c}>{label("confidence", c)}</option>)}
-            </select>
-          </label>
-          <button type="button" id="f-reset" class="btn">Reset</button>
-        </div>
-        <p id="f-count" class="filter-count" aria-live="polite">Showing all {rows.length} projects.</p>
+  <div class="filter-bar" role="search" aria-label="Filter projects">
+    <label class="grow">
+      <span>Search</span>
+      <input type="search" id="f-q" placeholder="Name, line, road, agency…" autocomplete="off" />
+    </label>
+    <details class="more" id="f-more">
+      <summary>Filters and sort <span id="f-active"></span></summary>
+      <div class="more-body">
+    <label>
+      <span>Category</span>
+      <select id="f-category">
+        <option value="">All</option>
+        {categories.map((c) => <option value={c}>{label("category", c)}</option>)}
+      </select>
+    </label>
+    <label>
+      <span>Status</span>
+      <select id="f-status">
+        <option value="">All</option>
+        {statuses.map((s) => <option value={s}>{label("status", s)}</option>)}
+      </select>
+    </label>
+    <label>
+      <span>Agency</span>
+      <select id="f-agency">
+        <option value="">All</option>
+        {agencies.map((a) => <option value={a}>{agencyText(a)}</option>)}
+      </select>
+    </label>
+    {
+      confidences.length > 1 && (
+        <label>
+          <span>Confidence</span>
+          <select id="f-confidence">
+            <option value="">All</option>
+            {confidences.map((c) => <option value={c}>{label("confidence", c)}</option>)}
+          </select>
+        </label>
+      )
+    }
+    <label>
+      <span>Sort by</span>
+      <select id="f-sort">
+        <option value="name">Name</option>
+        <option value="cost">Latest cost</option>
+        <option value="change">Cost change</option>
+        <option value="delay">Delay</option>
+        <option value="status">Stage</option>
+      </select>
+    </label>
+      </div>
+    </details>
+  </div>
+  <p id="f-count" class="filter-count" aria-live="polite">Showing all {rows.length} projects.</p>
 
-        <div class="card table-card" style="overflow-x: auto;">
-          <table id="projects-table">
-            <thead>
-              <tr>
-                <th><button type="button" data-sort="name" data-type="text">Project</button></th>
-                <th><button type="button" data-sort="agency" data-type="text">Agency</button></th>
-                <th class="num"><button type="button" data-sort="cost" data-type="num">Latest cost</button></th>
-                <th class="num"><button type="button" data-sort="overrun" data-type="num">Overrun</button></th>
-                <th><button type="button" data-sort="status" data-type="text">Status</button></th>
-                <th class="num"><button type="button" data-sort="slippage" data-type="num">Slippage</button></th>
-                <th><button type="button" data-sort="verified" data-type="text">Verified on</button></th>
-                <th><button type="button" data-sort="confidence" data-type="text">Confidence</button></th>
-                <th class="num"><button type="button" data-sort="sources" data-type="num">Sources</button></th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map(({ project, cost, overrun, slippage, stale, sources }) => (
-                <tr
-                  class="row-link"
-                  data-href={`/projects/${project.id}`}
-                  data-name={project.name.toLowerCase()}
-                  data-agency={project.agency}
-                  data-category={project.category}
-                  data-status={project.status}
-                  data-confidence={project.confidence}
-                  data-cost={cost ? cost.amount_cr : ""}
-                  data-overrun={overrun ?? ""}
-                  data-slippage={slippage ?? ""}
-                  data-verified={project.verified_on}
-                  data-sources={sources}
-                >
-                  <td data-cell="name"><a href={`/projects/${project.id}`}>{project.name}</a></td>
-                  <td data-cell="agency">{agencyLabel(project)}</td>
-                  <td class="num" data-cell="cost">{cost ? `₹${cost.amount_cr.toLocaleString("en-IN")} cr` : "no data"}</td>
-                  <td class="num" data-cell="overrun">{overrun === null ? "no data" : `${overrun >= 0 ? "+" : ""}${overrun.toFixed(1)}%`}</td>
-                  <td data-cell="status"><span class={`status-tab status-${project.status}`}>{label("status", project.status)}</span></td>
-                  <td class="num" data-cell="slippage">{slippage === null ? "no data" : `${slippage} mo`}</td>
-                  <td data-cell="verified">
-                    {project.verified_on}
-                    {stale && <span title="Not re-verified in the last two quarterly cycles"> ⚠</span>}
-                  </td>
-                  <td data-cell="confidence"><span class={`confidence confidence-${project.confidence}`}>{label("confidence", project.confidence)}</span></td>
-                  <td class="num" data-cell="sources">{sources}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p id="f-empty" class="filter-empty" hidden>No projects match these filters. <button type="button" id="f-empty-reset">Clear filters</button></p>
-      </>
-    )
-  }
+  <table class="plist" id="plist">
+    <thead>
+      <tr>
+        <th scope="col">Project</th>
+        <th scope="col">Status</th>
+        <th scope="col" class="num">Latest cost</th>
+        <th scope="col" class="num">Change since sanction</th>
+        <th scope="col" class="num">Delay</th>
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map(({ project, cost, change, delay, stale, notable }, i) => (
+        <tr
+          data-href={`/projects/${project.id}`}
+          data-search={[project.name, ...(project.aka ?? []), project.agency, agencyLabel(project), project.scope].join(" ").toLowerCase()}
+          data-agency={project.agency}
+          data-category={project.category}
+          data-status={project.status}
+          data-confidence={project.confidence}
+          data-name={i}
+          data-cost={cost?.amount_cr ?? ""}
+          data-change={change ?? ""}
+          data-delay={delay ?? ""}
+        >
+          <th scope="row" data-label="Project">
+            <a href={`/projects/${project.id}`}>{project.name}</a>
+            <span class="sub">
+              {agencyLabel(project)} · {label("category", project.category)}
+              {notable && <> · <span class={`confidence confidence-${project.confidence}`}>{label("confidence", project.confidence)} confidence</span></>}
+              {stale && <> · <span class="stale" title="Not re-checked in the last two quarterly cycles">possibly outdated</span></>}
+            </span>
+          </th>
+          <td data-label="Status"><span class={`status-tab status-${project.status}`}>{label("status", project.status)}</span></td>
+          <td class="num" data-label="Latest cost">{cost ? formatCr(cost.amount_cr) : <span class="none" title="Not on record yet">—</span>}</td>
+          <td class="num" data-label="Change since sanction">
+            {change === null ? <span class="none" title="Needs both a sanctioned and a later figure">—</span> : formatPct(change)}
+          </td>
+          <td class="num" data-label="Delay">{delay === null ? <span class="none" title="Needs both an original and a current deadline">—</span> : `${delay} months`}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  <p id="f-empty" class="filter-empty" hidden>No projects match. <button type="button" id="f-clear">Clear filters</button></p>
+  <p class="legend-note">— means not on record yet. Change and delay need two figures to compare, so most projects don't have them yet.</p>
 </Base>
 
 <style>
-  #f-search { min-width: 12rem; }
+  .page-head p { color: var(--ink-muted); }
+  .filter-bar .grow { flex: 1 1 14rem; }
+  .filter-bar .grow input { width: 100%; }
+  /* Desktop: filters always visible (the script keeps the details open). Phones: one tap to reveal. */
+  .more { flex: 0 1 auto; }
+  .more > summary { display: none; }
+  .more-body { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.75rem 1rem; }
+  .more-body label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.78rem; color: var(--ink-muted); }
+  @media (max-width: 44rem) {
+    .more { display: block; flex: 1 1 100%; }
+    .more > summary { display: list-item; cursor: pointer; font-weight: 600; font-size: 0.9rem; padding: 0.2rem 0; }
+    .more-body { margin-top: 0.6rem; }
+    #f-active { font-weight: 400; color: var(--accent); }
+  }
 
-  #projects-table th button {
-    all: unset;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    cursor: pointer;
-    font: inherit;
-    font-weight: 600;
-    color: var(--ink-muted);
-    font-size: 0.82rem;
-  }
-  #projects-table th button:hover { color: var(--ink); }
-  #projects-table th button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  #projects-table th button::after {
-    content: "";
-    width: 0;
-    opacity: 0.4;
-  }
-  #projects-table th button[data-active]::after {
-    content: attr(data-dir);
-    opacity: 1;
-  }
-  #projects-table th { position: sticky; top: 0; background: var(--card-bg); z-index: 1; }
-  .table-card { padding: 0.75rem 1rem; }
+  .plist { margin-top: 0.25rem; background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--card-shadow); overflow: hidden; }
+  .plist th[scope="row"] { font-weight: 400; color: var(--ink); font-size: 0.95rem; border-bottom: 1px solid var(--rule); }
+  .plist th[scope="row"] a { font-weight: 600; color: var(--ink); text-decoration: none; }
+  .plist tbody tr { cursor: pointer; }
+  .plist tbody tr:hover th[scope="row"] a { color: var(--accent); text-decoration: underline; }
+  .sub { display: block; font-size: 0.8rem; color: var(--ink-muted); margin-top: 0.15rem; }
+  .sub .confidence { font-size: 0.7rem; padding: 0.15rem 0.5rem; }
+  .stale { color: var(--status-stalled); font-weight: 600; }
+  .none { color: var(--ink-muted); }
+  .legend-note { font-size: 0.82rem; color: var(--ink-muted); margin-top: 0.75rem; }
 
-  /* Whole row is the click target — the link inside is kept for keyboard/
-     screen-reader access and right-click/middle-click, but styled as plain
-     text so it doesn't read as a separate, narrower link target. */
-  #projects-table tbody tr.row-link { cursor: pointer; }
-  #projects-table td[data-cell="name"] a {
-    color: inherit;
-    text-decoration: none;
-    font-weight: 600;
-  }
-  #projects-table tbody tr.row-link:hover td[data-cell="name"] a { color: var(--accent); }
-  #projects-table td[data-cell="name"] a:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
+  /* Phones: each row becomes a card; the same markup, no second list. */
+  @media (max-width: 44rem) {
+    .plist, .plist tbody { display: block; background: none; box-shadow: none; }
+    .plist thead { display: none; }
+    .plist tbody tr {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.35rem 1rem;
+      background: var(--card-bg);
+      box-shadow: var(--card-shadow);
+      border-radius: var(--radius);
+      padding: 0.9rem 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .plist tbody tr[hidden] { display: none; }
+    .plist th[scope="row"], .plist td { border: none; padding: 0; text-align: left; }
+    .plist th[scope="row"] { grid-column: 1 / -1; }
+    .plist td[data-label="Status"] { grid-column: 1 / -1; }
+    .plist td.num::before {
+      content: attr(data-label);
+      display: block;
+      font-size: 0.72rem;
+      color: var(--ink-muted);
+    }
+    /* Don't spend a card line on values that aren't on record. */
+    .plist td.num:has(.none) { display: none; }
   }
 </style>
 
 <script>
-  const table = document.getElementById("projects-table") as HTMLTableElement | null;
-  if (table) {
-    const tbody = table.tBodies[0];
-    const rows = Array.from(tbody.rows);
-    const countEl = document.getElementById("f-count")!;
-    const emptyEl = document.getElementById("f-empty")!;
-    const total = rows.length;
+  const table = document.getElementById("plist") as HTMLTableElement;
+  const tbody = table.tBodies[0];
+  const rows = Array.from(tbody.rows);
+  const get = (id: string) => document.getElementById(id) as HTMLInputElement | HTMLSelectElement | null;
+  const controls = { q: get("f-q"), category: get("f-category"), status: get("f-status"), agency: get("f-agency"), confidence: get("f-confidence"), sort: get("f-sort") };
+  const countEl = document.getElementById("f-count")!;
+  const emptyEl = document.getElementById("f-empty")!;
+  const STAGES = ["announced", "sanctioned", "tendering", "awarded", "under_construction", "partially_open", "complete", "stalled", "cancelled"];
 
-    const searchEl = document.getElementById("f-search") as HTMLInputElement;
-    const agencyEl = document.getElementById("f-agency") as HTMLSelectElement;
-    const categoryEl = document.getElementById("f-category") as HTMLSelectElement;
-    const statusEl = document.getElementById("f-status") as HTMLSelectElement;
-    const confidenceEl = document.getElementById("f-confidence") as HTMLSelectElement;
-    const resetBtn = document.getElementById("f-reset")!;
-    const emptyResetBtn = document.getElementById("f-empty-reset")!;
-
-    tbody.addEventListener("click", (e) => {
-      const target = e.target as HTMLElement;
-      if (target.closest("a")) return; // let the real link handle its own click (new tab, etc.)
-      const row = target.closest("tr");
-      const href = row?.dataset.href;
-      if (href) window.location.href = href;
-    });
-
-    function applyFilters() {
-      const q = searchEl.value.trim().toLowerCase();
-      const agency = agencyEl.value;
-      const category = categoryEl.value;
-      const status = statusEl.value;
-      const confidence = confidenceEl.value;
-
-      let visible = 0;
-      for (const row of rows) {
-        const matches =
-          (!q || row.dataset.name!.includes(q) || row.dataset.agency!.toLowerCase().includes(q)) &&
-          (!agency || row.dataset.agency === agency) &&
-          (!category || row.dataset.category === category) &&
-          (!status || row.dataset.status === status) &&
-          (!confidence || row.dataset.confidence === confidence);
-        row.hidden = !matches;
-        if (matches) visible++;
-      }
-
-      countEl.hidden = visible === 0;
-      emptyEl.hidden = visible !== 0;
-      countEl.textContent =
-        visible === total ? `Showing all ${total} projects.` : `Showing ${visible} of ${total} projects.`;
-    }
-
-    for (const el of [searchEl, agencyEl, categoryEl, statusEl, confidenceEl]) {
-      el.addEventListener("input", applyFilters);
-    }
-    function resetFilters() {
-      searchEl.value = "";
-      agencyEl.value = "";
-      categoryEl.value = "";
-      statusEl.value = "";
-      confidenceEl.value = "";
-      applyFilters();
-    }
-    resetBtn.addEventListener("click", resetFilters);
-    emptyResetBtn.addEventListener("click", resetFilters);
-
-    // Sorting
-    let currentSort: { key: string; dir: 1 | -1 } | null = null;
-    const headerButtons = Array.from(table.querySelectorAll<HTMLButtonElement>("th button[data-sort]"));
-
-    function sortBy(key: string, type: string) {
-      const dir: 1 | -1 = currentSort && currentSort.key === key ? (currentSort.dir === 1 ? -1 : 1) : 1;
-      currentSort = { key, dir };
-
-      const sorted = rows.slice().sort((a, b) => {
-        const av = a.dataset[key] ?? "";
-        const bv = b.dataset[key] ?? "";
-        if (type === "num") {
-          const an = av === "" ? -Infinity : parseFloat(av);
-          const bn = bv === "" ? -Infinity : parseFloat(bv);
-          return (an - bn) * dir;
-        }
-        return av.localeCompare(bv) * dir;
-      });
-
-      for (const row of sorted) tbody.appendChild(row);
-
-      for (const btn of headerButtons) {
-        if (btn.dataset.sort === key) {
-          btn.setAttribute("data-active", "");
-          btn.setAttribute("data-dir", dir === 1 ? "▲" : "▼");
-        } else {
-          btn.removeAttribute("data-active");
-        }
-      }
-    }
-
-    for (const btn of headerButtons) {
-      btn.addEventListener("click", () => sortBy(btn.dataset.sort!, btn.dataset.type!));
-    }
+  // Start from the URL, so filtered views can be shared (and the homepage search and category chips land here).
+  const params = new URLSearchParams(location.search);
+  for (const [key, el] of Object.entries(controls)) {
+    const v = params.get(key);
+    if (el && v !== null && (el.tagName === "INPUT" || [...(el as HTMLSelectElement).options].some((o) => o.value === v))) el.value = v;
   }
+
+  const more = document.getElementById("f-more") as HTMLDetailsElement;
+  const wide = matchMedia("(min-width: 44.01rem)");
+  const syncMore = () => { if (wide.matches) more.open = true; };
+  wide.addEventListener("change", syncMore);
+  syncMore();
+
+  function apply() {
+    const q = controls.q?.value.trim().toLowerCase() ?? "";
+    let visible = 0;
+    for (const row of rows) {
+      const d = row.dataset;
+      const show =
+        (!q || q.split(/\s+/).every((word) => d.search!.includes(word))) &&
+        (!controls.category?.value || d.category === controls.category.value) &&
+        (!controls.status?.value || d.status === controls.status.value) &&
+        (!controls.agency?.value || d.agency === controls.agency.value) &&
+        (!controls.confidence?.value || d.confidence === controls.confidence.value);
+      row.hidden = !show;
+      if (show) visible++;
+    }
+    const sort = controls.sort?.value ?? "name";
+    const num = (r: HTMLTableRowElement, k: string) => (r.dataset[k] === "" ? null : Number(r.dataset[k]));
+    const sorted = rows.slice().sort((a, b) => {
+      if (sort === "status") return STAGES.indexOf(b.dataset.status!) - STAGES.indexOf(a.dataset.status!);
+      if (sort === "name") return Number(a.dataset.name) - Number(b.dataset.name);
+      // Numeric sorts: largest first, projects without a value last.
+      const x = num(a, sort), y = num(b, sort);
+      if (x === null && y === null) return Number(a.dataset.name) - Number(b.dataset.name);
+      if (x === null) return 1;
+      if (y === null) return -1;
+      return y - x;
+    });
+    for (const r of sorted) tbody.appendChild(r);
+
+    const active = ["category", "status", "agency", "confidence"].filter((k) => (controls as any)[k]?.value).length;
+    document.getElementById("f-active")!.textContent = active ? `(${active} active)` : "";
+    if (active && !more.open) more.open = true;
+    countEl.textContent = visible === rows.length ? `Showing all ${rows.length} projects.` : `Showing ${visible} of ${rows.length} projects.`;
+    emptyEl.hidden = visible !== 0;
+
+    const next = new URLSearchParams();
+    for (const [key, el] of Object.entries(controls)) if (el?.value && !(key === "sort" && el.value === "name")) next.set(key, el.value);
+    history.replaceState(null, "", next.toString() ? `?${next}` : location.pathname);
+  }
+
+  for (const el of Object.values(controls)) el?.addEventListener("input", apply);
+  document.getElementById("f-clear")!.addEventListener("click", () => {
+    for (const [key, el] of Object.entries(controls)) if (el) el.value = key === "sort" ? "name" : "";
+    apply();
+  });
+  tbody.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("a")) return;
+    const href = target.closest("tr")?.dataset.href;
+    if (href) location.href = href;
+  });
+  apply();
 </script>
