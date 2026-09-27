@@ -220,6 +220,29 @@ for (const { file, record } of records.project) {
   }
 }
 
+// Rule: the corrections log must point at real projects and sources, and
+// its ids must be unique (spec §6.5: the log is permanent, so it has to be right).
+{
+  const file = join(dataDir, "corrections.json");
+  if (existsSync(file)) {
+    const schemaPath = join(schemaDir, "correction.schema.json");
+    const validateCorrections = ajv.compile(JSON.parse(readFileSync(schemaPath, "utf8")));
+    const log = JSON.parse(readFileSync(file, "utf8"));
+    if (!validateCorrections(log)) {
+      for (const err of validateCorrections.errors) errors.push(`[correction] ${file}: ${err.instancePath || "/"} ${err.message}`);
+    } else {
+      const projectIds = new Set(records.project.map(({ record }) => record.id));
+      const seen = new Set();
+      for (const c of log) {
+        if (seen.has(c.id)) errors.push(`[correction] ${c.id}: duplicate id`);
+        seen.add(c.id);
+        if (!projectIds.has(c.project_id)) errors.push(`[correction] ${c.id}: project "${c.project_id}" not found`);
+        if (!sourceIds.has(c.resolved_by_source_id)) errors.push(`[correction] ${c.id}: source "${c.resolved_by_source_id}" not found`);
+      }
+    }
+  }
+}
+
 // Rules: geometry lives in data/geometry/<project-id>.geojson (docs/plans/02 §2).
 // Coordinates must fall in a generous box around Bengaluru; anything outside
 // is almost always latitude and longitude swapped.

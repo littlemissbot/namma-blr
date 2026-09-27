@@ -50,6 +50,10 @@ file. The checklist below still applies.
     P2). A budget speech figure is `announced`, not `sanctioned`.
   - `as_of` is when the figure was true, not when you read it.
   - `budget_head` is the line item as printed, if there is one.
+  - `covers` is required when the figure isn't for the whole project: one
+    contract package, one reach, a loan tranche, rolling stock, or a combined
+    figure for several projects. Such figures are shown but never used as the
+    project's cost or overrun.
   - Set `comparable_to_prior: false` if the definition changed from earlier
     years (P3).
 - [ ] **Add events** in `data/events/` for dated developments. The summary

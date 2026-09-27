@@ -20,6 +20,10 @@
       "type": "string",
       "description": "When funder is external: JICA, World Bank, HUDCO, etc."
     },
+    "covers": {
+      "type": "string",
+      "description": "Set when this figure is not for the whole project: what it covers instead (one contract package, one reach, a loan tranche, rolling stock, or a combined figure for several projects). Such figures are shown but never used as the project's cost or overrun."
+    },
     "budget_head": {
       "type": "string",
       "description": "Budget line, head of account or scheme name as printed in the source, so the figure can be found again in the document"

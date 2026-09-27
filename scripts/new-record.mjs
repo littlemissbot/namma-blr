@@ -140,6 +140,7 @@ async function newMoney() {
   const project_id = await ask("Project id", { check: projectCheck(projects) });
   const kind = await ask("Kind of figure (a budget speech figure is \"announced\", not \"sanctioned\")", { choices: props.kind.enum });
   const amount = await ask("Amount in ₹ crore", { check: (s) => (Number.isFinite(Number(s)) && Number(s) >= 0 ? null : "Enter a number, e.g. 1234.5") });
+  const covers = await ask("If this figure is NOT for the whole project, what does it cover? (e.g. \"Package 2 civil works only\"; blank = whole project)", { optional: true });
   const as_of = await ask("As of: when this figure was true (YYYY-MM-DD)", { check: isDate });
   const fiscal_year = await ask("Fiscal year", { def: fiscalYearOf(as_of), check: (s) => (/^\d{4}-\d{2}$/.test(s) ? null : "Use e.g. 2025-26.") });
   const funder = await ask("Funder", { choices: props.funder.enum });
@@ -152,6 +153,7 @@ async function newMoney() {
     fiscal_year,
     kind,
     amount_cr: Number(amount),
+    covers,
     funder,
     funder_detail,
     budget_head,

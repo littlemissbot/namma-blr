@@ -32,7 +32,7 @@ export const GET: APIRoute = () => {
       status_group: statusGroup(project.status),
       confidence: project.confidence,
       geometry_basis: project.geometry_basis ?? "unknown",
-      cost_label: cost ? `₹${cost.amount_cr.toLocaleString("en-IN")} cr (${label("kind", cost.kind)})` : "no cost figure yet",
+      cost_label: cost ? `₹${cost.amount_cr.toLocaleString("en-IN")} cr (${label("kind", cost.kind)})` : "no whole-project cost figure yet",
       verified_on: project.verified_on,
       stale: isStale(project),
       wards: project.wards,

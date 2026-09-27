@@ -52,6 +52,7 @@ export interface MoneyEntry {
   amount_cr: number;
   funder: "state" | "centre" | "agency_borrowing" | "external" | "private";
   funder_detail?: string;
+  covers?: string;
   budget_head?: string;
   source_id: string;
   as_of: string;
@@ -183,21 +184,34 @@ export function getCorrections(): Correction[] {
 const COST_KINDS = new Set(["sanctioned", "revised_cost"]);
 
 /**
- * Most recent sanctioned/revised cost figure for a project, or undefined if none exists yet.
- * Excludes entries flagged comparable_to_prior: false (P3) — a separately-sanctioned
- * component (e.g. a funding tranche, or one corridor's own line item) is not the same
- * series as the project's total cost and must not silently become "the latest cost".
+ * A figure for the whole project, as opposed to one package, reach, loan tranche
+ * or a combined figure for several projects (those carry `covers`). Only
+ * whole-project figures may stand for "the project's cost".
+ */
+export function isWholeProject(m: MoneyEntry): boolean {
+  return !m.covers;
+}
+
+/**
+ * Most recent sanctioned/revised whole-project cost, or undefined if none exists yet.
+ * Excludes part-project figures (`covers`) and entries flagged comparable_to_prior:
+ * false (P3), which aren't the same series as the project's total cost.
  */
 export function latestCost(projectId: string): MoneyEntry | undefined {
   const costEntries = getMoneyEntries(projectId).filter(
-    (m) => COST_KINDS.has(m.kind) && m.comparable_to_prior !== false
+    (m) => COST_KINDS.has(m.kind) && isWholeProject(m) && m.comparable_to_prior !== false
   );
   return costEntries.at(-1);
 }
 
-/** Earliest sanctioned figure — the baseline for overrun %. */
+/** Earliest whole-project sanctioned figure — the baseline for overrun %. */
 export function originalSanctionedCost(projectId: string): MoneyEntry | undefined {
-  return getMoneyEntries(projectId).find((m) => m.kind === "sanctioned");
+  return getMoneyEntries(projectId).find((m) => m.kind === "sanctioned" && isWholeProject(m));
+}
+
+/** Number of part-project figures on file, to explain a missing whole-project cost. */
+export function partFigureCount(projectId: string): number {
+  return getMoneyEntries(projectId).filter((m) => !isWholeProject(m)).length;
 }
 
 /** Overrun % vs. the original sanctioned amount, or null when either figure is missing. */

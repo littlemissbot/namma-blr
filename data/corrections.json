@@ -7,5 +7,50 @@
     "now": "Both are filed under fiscal year 2016-17, matching their approximate award date (October 2016). The amounts are unchanged.",
     "raised_by": "self-review",
     "resolved_by_source_id": "S35"
+  },
+  {
+    "id": "C2",
+    "date": "2026-09-27",
+    "project_id": "blue-line-phase-2a",
+    "was": "Latest cost ₹623.55 cr and originally sanctioned ₹785.24 cr, with an overrun of −20.6%. These were two different civil-works packages compared with each other.",
+    "now": "No whole-project cost is on file yet. Both package contracts, and the combined Phase 2A+2B figure, are listed as part figures.",
+    "raised_by": "self-review",
+    "resolved_by_source_id": "S38"
+  },
+  {
+    "id": "C3",
+    "date": "2026-09-27",
+    "project_id": "blue-line-phase-2b",
+    "was": "Latest and originally sanctioned cost ₹182.33 cr, which is the Airport depot civil-works contract only.",
+    "now": "No whole-project cost is on file yet. The depot contract is listed as a part figure.",
+    "raised_by": "self-review",
+    "resolved_by_source_id": "S39"
+  },
+  {
+    "id": "C4",
+    "date": "2026-09-27",
+    "project_id": "cauvery-stage-5",
+    "was": "Latest and originally sanctioned cost ₹4,336 cr, which is the JICA loan for Phase 3(I) only.",
+    "now": "No whole-project cost is on file yet. Both JICA loans are listed as part figures.",
+    "raised_by": "self-review",
+    "resolved_by_source_id": "S28"
+  },
+  {
+    "id": "C5",
+    "date": "2026-09-27",
+    "project_id": "pink-line",
+    "was": "Latest and originally sanctioned cost ₹578.7 cr, which is the original Reach 6 elevated-section contract only.",
+    "now": "No whole-project cost is on file yet. Both Reach 6 contracts, the underground package and the trainset order are listed as part figures.",
+    "raised_by": "self-review",
+    "resolved_by_source_id": "S32"
+  },
+  {
+    "id": "C6",
+    "date": "2026-09-27",
+    "project_id": "purple-line-ext-mysore-road",
+    "was": "Latest cost ₹332 cr and originally sanctioned ₹327 cr, with an overrun of +1.5%. These were the Reach 2B and Reach 2A contracts compared with each other.",
+    "now": "No whole-project cost is on file yet. Both reach contracts are listed as part figures.",
+    "raised_by": "self-review",
+    "resolved_by_source_id": "S35"
   }
 ]

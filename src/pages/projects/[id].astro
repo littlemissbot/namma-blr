@@ -11,6 +11,7 @@ import {
   isStale,
   latestCost,
   originalSanctionedCost,
+  partFigureCount,
   slippageMonths,
   agencyLabel,
 } from "../../lib/data";
@@ -36,6 +37,8 @@ const related = getProjects()
 const cost = latestCost(project.id);
 const sanctioned = originalSanctionedCost(project.id);
 const slippage = slippageMonths(project);
+const parts = partFigureCount(project.id);
+const noWhole = parts > 0 ? "no whole-project figure" : "no data";
 ---
 
 <Base title={project.name}>
@@ -60,11 +63,11 @@ const slippage = slippageMonths(project);
         <div class="stat-grid hero-stats">
           <div class="stat-cell">
             <div class="stat-label">Latest cost on record</div>
-            <div class="stat-value">{cost ? cr(cost.amount_cr) : "no data"}</div>
+            <div class="stat-value">{cost ? cr(cost.amount_cr) : noWhole}</div>
           </div>
           <div class="stat-cell">
             <div class="stat-label">Originally sanctioned</div>
-            <div class="stat-value">{sanctioned ? cr(sanctioned.amount_cr) : "no data"}</div>
+            <div class="stat-value">{sanctioned ? cr(sanctioned.amount_cr) : noWhole}</div>
           </div>
           <div class="stat-cell">
             <div class="stat-label">Sanctioned</div>
@@ -119,7 +122,10 @@ const slippage = slippageMonths(project);
                 <tbody>
                   {money.map((m) => (
                     <tr>
-                      <td>{label("kind", m.kind)}{m.comparable_to_prior === false && " *"}</td>
+                      <td>
+                        {label("kind", m.kind)}{m.comparable_to_prior === false && " *"}
+                        {m.covers && <span class="covers">Part figure: {m.covers}</span>}
+                      </td>
                       <td>{m.fiscal_year}</td>
                       <td class="num">{cr(m.amount_cr)}</td>
                       <td>{label("funder", m.funder)}{m.funder_detail ? ` — ${m.funder_detail}` : ""}</td>
@@ -132,6 +138,12 @@ const slippage = slippageMonths(project);
             </div>
           )
         }
+        {parts > 0 && (
+          <p style="font-size: 0.85rem; color: var(--ink-muted);">
+            Part figures cover one contract, package, reach or loan (or several projects combined). They are shown for the
+            record but never used as this project's cost or to calculate overrun.
+          </p>
+        )}
         {money.some((m) => m.comparable_to_prior === false) && (
           <p style="font-size: 0.85rem; color: var(--ink-muted);">* Not comparable to the prior figure — a different scope or definition, not a straight revision.</p>
         )}
@@ -290,6 +302,7 @@ const slippage = slippageMonths(project);
     background: var(--ink-muted);
   }
   .timeline-date { font-weight: 600; display: block; font-size: 0.85rem; color: var(--ink-muted); }
+  .covers { display: block; font-size: 0.78rem; color: var(--ink-muted); font-weight: 400; }
   .timeline-deadline { display: block; font-size: 0.85rem; font-weight: 600; }
 
   /* Source ledger — a deliberately sharp-cornered, high-contrast box: the one
