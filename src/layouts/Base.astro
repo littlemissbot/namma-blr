@@ -51,6 +51,7 @@ const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWit
       .wordmark span { color: var(--accent); }
       .site-nav {
         display: flex;
+        flex-wrap: wrap;
         gap: 0.25rem;
         font-size: 0.9rem;
       }
@@ -58,10 +59,14 @@ const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWit
         color: var(--ink-muted);
         text-decoration: none;
         padding: 0.45rem 0.9rem;
+        white-space: nowrap;
         border: 1px solid transparent;
         border-radius: var(--radius-pill);
       }
       .site-nav a:hover { color: var(--ink); }
+      @media (max-width: 480px) {
+        .site-nav a { padding: 0.4rem 0.6rem; }
+      }
       .site-nav a[aria-current="page"] {
         color: var(--ink);
         font-weight: 600;
@@ -132,6 +137,7 @@ const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWit
         <a class="wordmark" href="/">Namma<span>BLR</span></a>
         <nav class="site-nav">
           <a href="/projects" aria-current={isActive("/projects") ? "page" : undefined}>Projects</a>
+          <a href="/coverage" aria-current={isActive("/coverage") ? "page" : undefined}>Coverage</a>
           <a href="/about-the-data" aria-current={isActive("/about-the-data") ? "page" : undefined}>About the data</a>
           <a href="/corrections" aria-current={isActive("/corrections") ? "page" : undefined}>Corrections</a>
         </nav>
