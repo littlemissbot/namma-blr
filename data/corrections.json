@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "id": "C1",
+    "date": "2026-09-27",
+    "project_id": "purple-line-ext-mysore-road",
+    "was": "The Reach 2A (₹327 cr) and Reach 2B (₹332 cr) civil-works contract values were filed under fiscal year 2021-22, the year of the article that reported them.",
+    "now": "Both are filed under fiscal year 2016-17, matching their approximate award date (October 2016). The amounts are unchanged.",
+    "raised_by": "self-review",
+    "resolved_by_source_id": "S35"
+  }
+]
