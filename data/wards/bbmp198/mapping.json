@@ -1,0 +1,9 @@
+{
+  "source_file": "source/BBMP_oldWards.geojson",
+  "simplify": "10%",
+  "fields": {
+    "ward_no": "WARD_NO",
+    "name": "WARD_NAME",
+    "assembly_constituency": "ASS_CONST1"
+  }
+}

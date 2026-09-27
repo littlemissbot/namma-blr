@@ -1,0 +1,8 @@
+{
+  "source_file": "source/BBMP.geojson",
+  "simplify": "10%",
+  "fields": {
+    "ward_no": "KGISWardNo",
+    "name": "KGISWardName"
+  }
+}
