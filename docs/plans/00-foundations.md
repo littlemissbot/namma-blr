@@ -78,7 +78,7 @@ Plan 3. Set up the domain (`nammablr.org`) here.
 - [ ] (Good to have) Decide Kannada at launch
 - [x] Schema additions PR (event types, deadline fields, budget_head, BBMP, basis fields)
 - [x] `archive-sources` script (+ weekly workflow)
-- [ ] `new-record` scaffolding script
+- [x] `new-record` scaffolding script (`npm run new -- source|money|event`)
 - [x] Validator additions
 - [x] GitHub Actions: validate + build on PR
 - [x] CONTRIBUTING.md

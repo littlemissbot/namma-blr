@@ -16,6 +16,7 @@
     "build-wards": "node scripts/build-wards.mjs",
     "build-crosswalk": "node scripts/build-crosswalk.mjs",
     "assign-wards": "node scripts/assign-wards.mjs",
+    "new": "node scripts/new-record.mjs",
     "test": "node --test test/*.test.mjs"
   },
   "dependencies": {

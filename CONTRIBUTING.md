@@ -18,6 +18,20 @@ from it in a single PR titled after the document, e.g.
 [`docs/plans/01-historical-backfill.md`](./docs/plans/01-historical-backfill.md)
 for the order we're working through documents in.
 
+## Creating records without writing JSON
+
+```sh
+npm install
+npm run new -- source   # asks for title, publisher, document type, URL, page…
+npm run new -- money    # a figure: project, kind, amount, as-of date, source…
+npm run new -- event    # a dated development: project, date, type, summary, source
+```
+
+Each command asks one question at a time, suggests the right project id if
+you mistype it, fills in sensible defaults (today's date, the fiscal year from
+the as-of date), and checks the record against the schema before writing the
+file. The checklist below still applies.
+
 ## Checklist for a data PR (spec §4.4)
 
 - [ ] **Find the primary document.** The priority order is: budget
