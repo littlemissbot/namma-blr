@@ -1,3 +1,10 @@
+## Git workflow
+
+Maintainer preference: commit and push directly to `master` for this project.
+Don't create feature branches or pull requests unless asked. Vercel deploys
+`master` to production on every push, so run `npm run build` (which runs the
+validator) before pushing.
+
 ## Development
 
 When starting the dev server, use background mode:
