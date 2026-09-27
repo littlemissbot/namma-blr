@@ -101,7 +101,7 @@ retrieval date, so the geometry can be traced like any other figure.
 - [ ] File RTI for GBA 369-ward boundary shapefile/KML (GBA / UDD / KSRSAC)
 - [ ] Import BBMP 198 and 243 wards (official first, DataMeet fallback)
 - [x] `build-crosswalk` script (in-house area overlap)
-- [ ] `fetch-osm-geometry` script
+- [x] `fetch-osm-geometry` script (`npm run fetch-osm -- <project-id> relation/<id>`)
 - [ ] Geometry for the 14 metro projects
 - [ ] Geometry for roads (PRR, tunnel, Varthur–Gunjur, Alpine Eco)
 - [ ] Geometry for BSRP, Cauvery Stage 5, lake, park
