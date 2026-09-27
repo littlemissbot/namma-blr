@@ -36,6 +36,6 @@ when it's missed.
 
 - [x] `/changes` page + RSS + JSON
 - [ ] Git-history-derived "record updated" entries
-- [ ] Scheduled "Quarterly sweep" issue workflow
+- [x] Scheduled "Quarterly sweep" issue workflow
 - [ ] Weekly link-rot check
-- [ ] `/changelog` page + first entry
+- [x] `/changelog` page (first entry comes with the October 2026 sweep)

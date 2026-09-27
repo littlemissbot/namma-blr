@@ -1,0 +1,32 @@
+name: Quarterly sweep
+
+# Opens the quarterly re-verification issue (spec §6.1, §6.4) on the first of
+# January, April, July and October, listing every project oldest-verified
+# first. Also runnable on demand from the Actions tab.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 3 1 1,4,7,10 *" # 09:00 IST on the 1st
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  open-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Open sweep issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="$(node scripts/sweep-issue.mjs --out sweep.md)"
+          if gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[0].number' | grep -q .; then
+            echo "An open issue titled \"$title\" already exists; not opening another."
+          else
+            gh issue create --title "$title" --body-file sweep.md
+          fi

@@ -123,6 +123,7 @@ const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWit
       }
       .site-footer p { max-width: none; }
       .site-footer a { color: var(--ink-muted); text-decoration: underline; }
+      .cadence-line { margin-top: 0.5rem; }
     </style>
   </head>
   <body>
@@ -155,8 +156,13 @@ const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWit
           Bengaluru. Every figure is shown with its source and the date it was recorded. An
           allocation is not evidence that money was spent, and a delay is not evidence of
           wrongdoing. We do not allege misconduct by any individual, official, department or
-          contractor. <a href="/about-the-data">Full disclaimer and sourcing</a> ·
+          contractor. <a href="/about-the-data">Full disclaimer and sourcing</a> ·{" "}
           <a href="/corrections">Corrections log</a>
+        </p>
+        <p class="cadence-line">
+          Updated quarterly, in January, April, July and October. Next sweep due {nextDueLabel}.
+          Each project also shows the date it was last checked. <a href="/changelog">Changelog</a> ·{" "}
+          <a href="/changes.xml">RSS</a>
         </p>
       </div>
     </footer>
