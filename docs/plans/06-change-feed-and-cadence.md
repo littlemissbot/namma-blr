@@ -34,7 +34,7 @@ when it's missed.
 
 ## Issues to open
 
-- [ ] `/changes` page + RSS + JSON
+- [x] `/changes` page + RSS + JSON
 - [ ] Git-history-derived "record updated" entries
 - [ ] Scheduled "Quarterly sweep" issue workflow
 - [ ] Weekly link-rot check

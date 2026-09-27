@@ -26,6 +26,7 @@ const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWit
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title} · NammaBLR</title>
+    <link rel="alternate" type="application/rss+xml" title="NammaBLR: what changed" href="/changes.xml" />
     <style>
       /* ---- Header: a row of filed tabs, not a nav bar ---- */
       .site-header {
@@ -137,6 +138,7 @@ const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWit
         <a class="wordmark" href="/">Namma<span>BLR</span></a>
         <nav class="site-nav">
           <a href="/projects" aria-current={isActive("/projects") ? "page" : undefined}>Projects</a>
+          <a href="/changes" aria-current={isActive("/changes") ? "page" : undefined}>What changed</a>
           <a href="/coverage" aria-current={isActive("/coverage") ? "page" : undefined}>Coverage</a>
           <a href="/about-the-data" aria-current={isActive("/about-the-data") ? "page" : undefined}>About the data</a>
           <a href="/corrections" aria-current={isActive("/corrections") ? "page" : undefined}>Corrections</a>

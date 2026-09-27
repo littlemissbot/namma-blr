@@ -351,3 +351,41 @@ export function coverageMatrix() {
     },
   };
 }
+
+/** Plain-language labels for event types (spec §3.3). */
+export const EVENT_TYPE_LABEL: Record<Event["type"], string> = {
+  announced: "Announced",
+  sanctioned: "Sanctioned",
+  tender_floated: "Tender floated",
+  bid_received: "Bid received",
+  awarded: "Awarded",
+  deadline_revised: "Deadline revised",
+  section_opened: "Section opened",
+  cost_revised: "Cost revised",
+  stalled: "Stalled",
+  resumed: "Resumed",
+  completed: "Completed",
+  cancelled: "Cancelled",
+};
+
+export interface Change {
+  event: Event;
+  project: Project;
+  source: Source | undefined;
+  /** Stable id for feeds: project, date and type are unique in practice. */
+  id: string;
+}
+
+/** Every event, newest first, with its project and source: the "what changed" feed (spec §5.4). */
+export function getChanges(): Change[] {
+  const projects = new Map(getProjects().map((p) => [p.id, p]));
+  return getEvents()
+    .filter((e) => projects.has(e.project_id))
+    .map((event) => ({
+      event,
+      project: projects.get(event.project_id)!,
+      source: getSource(event.source_id),
+      id: `${event.project_id}/${event.date}/${event.type}`,
+    }))
+    .sort((a, b) => b.event.date.localeCompare(a.event.date) || a.project.name.localeCompare(b.project.name));
+}
