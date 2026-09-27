@@ -54,7 +54,7 @@
     "current_deadline": { "type": ["string", "null"], "format": "date" },
     "pending": { "type": "string", "description": "What is blocking it, factually stated" },
     "geometry": {
-      "description": "LineString for corridors, Point for facilities, Polygon for areas",
+      "description": "Deprecated: must be null or absent. Geometry lives in data/geometry/<project-id>.geojson so project diffs stay readable (docs/plans/02).",
       "oneOf": [
         { "type": "null" },
         {
@@ -85,7 +85,12 @@
     },
     "corporation": {
       "enum": ["Central", "East", "North", "South", "West", "outside_GBA", "BBMP"],
-      "description": "GBA corporation, outside_GBA, or BBMP for records that predate the 2025 GBA restructuring"
+      "description": "GBA corporation, outside_GBA, or BBMP for records that predate the 2025 GBA restructuring. For projects spanning several corporations this is the one with the largest share; see corporations."
+    },
+    "corporations": {
+      "type": "array",
+      "items": { "enum": ["Central", "East", "North", "South", "West"] },
+      "description": "Every GBA corporation the project touches, when there is more than one. Set by scripts/assign-wards.mjs."
     },
     "confidence": { "enum": ["high", "medium", "low"] },
     "verified_on": {

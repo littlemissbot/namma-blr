@@ -7,6 +7,10 @@
 //   - deadline fields on an event that isn't a deadline_revised event
 //   - a ward code that doesn't exist in that scheme's boundary file
 //     (once data/wards/<scheme>/wards.geojson has been imported)
+//   - inline project.geometry (geometry lives in data/geometry/<id>.geojson)
+//   - a geometry file with no matching project, an unsupported type, or
+//     coordinates outside the Bengaluru region (usually swapped lat/lon)
+//   - a project with a geometry file but no geometry_basis
 // Warns, without failing, on things a reviewer should look at:
 //   - a source with no archive_url (spec §4.2: government URLs rot)
 //   - a deadline_revised event with no new_deadline
@@ -213,6 +217,65 @@ for (const { file, record } of records.project) {
   for (const code of record.wards) {
     const known = wardCodes.get(code.split(":")[0]);
     if (known && !known.has(code)) errors.push(`[project] ${file}: ward "${code}" not found in its boundary file`);
+  }
+}
+
+// Rules: geometry lives in data/geometry/<project-id>.geojson (docs/plans/02 §2).
+// Coordinates must fall in a generous box around Bengaluru; anything outside
+// is almost always latitude and longitude swapped.
+const REGION = { minLon: 76.8, maxLon: 78.4, minLat: 12.3, maxLat: 13.8 };
+const GEOMETRY_TYPES = new Set(["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon", "GeometryCollection"]);
+const projectsById = new Map(records.project.map(({ record }) => [record.id, record]));
+for (const { file, record } of records.project) {
+  if (record.geometry != null) {
+    errors.push(`[project] ${file}: inline geometry is not allowed; move it to data/geometry/${record.id}.geojson`);
+  }
+}
+function* positions(g) {
+  if (g.type === "GeometryCollection") {
+    for (const part of g.geometries) yield* positions(part);
+    return;
+  }
+  const walk = function* (c) {
+    if (typeof c[0] === "number") yield c;
+    else for (const x of c) yield* walk(x);
+  };
+  yield* walk(g.coordinates);
+}
+function* geometriesOf(geojson) {
+  if (geojson.type === "FeatureCollection") for (const f of geojson.features) yield f.geometry;
+  else if (geojson.type === "Feature") yield geojson.geometry;
+  else yield geojson;
+}
+const geometryDir = join(dataDir, "geometry");
+if (existsSync(geometryDir)) {
+  for (const f of readdirSync(geometryDir).filter((f) => f.endsWith(".geojson"))) {
+    const file = join(geometryDir, f);
+    const id = f.replace(/\.geojson$/, "");
+    let geojson;
+    try {
+      geojson = JSON.parse(readFileSync(file, "utf8"));
+    } catch (err) {
+      errors.push(`[geometry] ${file}: invalid JSON (${err.message})`);
+      continue;
+    }
+    const project = projectsById.get(id);
+    if (!project) errors.push(`[geometry] ${file}: no project with id "${id}"`);
+    else if (!project.geometry_basis || project.geometry_basis === "unknown") {
+      errors.push(`[project] ${id}: has a geometry file, so geometry_basis must say where it came from (surveyed, osm or approximate)`);
+    }
+    for (const g of geometriesOf(geojson)) {
+      if (!g || !GEOMETRY_TYPES.has(g.type)) {
+        errors.push(`[geometry] ${file}: unsupported geometry type ${g?.type}`);
+        continue;
+      }
+      const outside = [...positions(g)].find(
+        ([lon, lat]) => !(lon >= REGION.minLon && lon <= REGION.maxLon && lat >= REGION.minLat && lat <= REGION.maxLat)
+      );
+      if (outside) {
+        errors.push(`[geometry] ${file}: coordinate [${outside}] is outside the Bengaluru region; is it [longitude, latitude]?`);
+      }
+    }
   }
 }
 

@@ -100,9 +100,10 @@ retrieval date, so the geometry can be traced like any other figure.
 - [ ] Find the GBA 2025 delimitation notification + maps; check KGIS for a GIS layer
 - [ ] File RTI for GBA 369-ward boundary shapefile/KML (GBA / UDD / KSRSAC)
 - [ ] Import BBMP 198 and 243 wards (official first, DataMeet fallback)
-- [ ] `build-crosswalk` script (in-house area overlap)
+- [x] `build-crosswalk` script (in-house area overlap)
 - [ ] `fetch-osm-geometry` script
 - [ ] Geometry for the 14 metro projects
 - [ ] Geometry for roads (PRR, tunnel, Varthur–Gunjur, Alpine Eco)
 - [ ] Geometry for BSRP, Cauvery Stage 5, lake, park
-- [ ] `assign-wards` script + CI check
+- [x] `assign-wards` script + CI check
+- [x] `build-wards` script (KML / shapefile / GeoJSON, reprojection, simplified browser copy); see `data/wards/README.md`

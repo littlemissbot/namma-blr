@@ -36,8 +36,10 @@ Four entities as flat JSON files under `data/`, validated against JSON Schemas i
 | `correction`  | `data/corrections.json`| `schema/correction.schema.json`    |
 
 Ward boundary geometry (both pre-GBA BBMP wards and the new five-corporation
-divisions, per spec §8.3) belongs under `data/wards/` — not populated yet, needed for
-Phase 3 (ward filtering).
+divisions, per spec §8.3) belongs under `data/wards/`. It isn't populated yet; the
+import tooling is ready (see `data/wards/README.md`). Project geometry goes in
+`data/geometry/<project-id>.geojson`, and each project's `wards` list is derived from it
+by `npm run assign-wards`, never typed by hand.
 
 One file per record, named after its id (e.g. `data/projects/metro-phase-2.json`), so
 diffs stay small and reviewable at a single commit — that reviewability is itself part

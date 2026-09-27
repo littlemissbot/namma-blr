@@ -19,5 +19,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm test
+      # Project ward lists are derived from geometry; fail if any is stale.
+      - run: npm run assign-wards -- --check
       # `npm run build` runs the validator first.
       - run: npm run build

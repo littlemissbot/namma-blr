@@ -37,6 +37,7 @@ export interface Project {
   wards: string[];
   ward_basis?: string;
   corporation: "Central" | "East" | "North" | "South" | "West" | "outside_GBA" | "BBMP";
+  corporations?: ("Central" | "East" | "North" | "South" | "West")[];
   confidence: Confidence;
   verified_on: string;
   notes?: string;

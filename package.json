@@ -12,7 +12,11 @@
     "preview": "astro preview",
     "astro": "astro",
     "validate": "node scripts/validate.mjs",
-    "archive-sources": "node scripts/archive-sources.mjs"
+    "archive-sources": "node scripts/archive-sources.mjs",
+    "build-wards": "node scripts/build-wards.mjs",
+    "build-crosswalk": "node scripts/build-crosswalk.mjs",
+    "assign-wards": "node scripts/assign-wards.mjs",
+    "test": "node --test test/*.test.mjs"
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans": "^5.3.0",
@@ -20,8 +24,19 @@
     "astro": "^7.3.3"
   },
   "devDependencies": {
+    "@tmcw/togeojson": "^7.1.2",
+    "@turf/area": "^7.4.0",
+    "@turf/bbox": "^7.4.0",
+    "@turf/boolean-point-in-polygon": "^7.4.0",
+    "@turf/buffer": "^7.4.0",
+    "@turf/helpers": "^7.4.0",
+    "@turf/intersect": "^7.4.0",
+    "@xmldom/xmldom": "^0.9.12",
     "ajv": "^8.17.1",
-    "ajv-formats": "^3.0.1"
+    "ajv-formats": "^3.0.1",
+    "mapshaper": "^0.7.68",
+    "proj4": "^2.22.0",
+    "shapefile": "^0.6.6"
   },
   "allowScripts": {
     "esbuild": true
