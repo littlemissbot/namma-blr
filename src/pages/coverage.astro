@@ -1,18 +1,10 @@
 ---
 import Base from "../layouts/Base.astro";
+import { label } from "../i18n";
 import { coverageMatrix, agencyLabel, BACKFILL_START_FY } from "../lib/data";
 
 const { years, rows, totals } = coverageMatrix();
 const pct = (n: number, d: number) => (d === 0 ? "0%" : `${Math.round((n / d) * 100)}%`);
-const KIND_SHORT: Record<string, string> = {
-  announced: "A",
-  sanctioned: "S",
-  revised_cost: "R",
-  bid_received: "B",
-  released: "Rel",
-  utilised: "U",
-};
-const STRENGTH_LABEL = { primary: "primary document", news: "news only", press_release: "press release only" };
 const cr = (n: number) => `₹${n.toLocaleString("en-IN")} cr`;
 ---
 
@@ -81,10 +73,10 @@ const cr = (n: number) => `₹${n.toLocaleString("en-IN")} cr`;
                 if (c.entries.length === 0) {
                   return <td class="cell-gap" title={`${c.fiscalYear}: no figure found yet`}></td>;
                 }
-                const kinds = [...new Set(c.entries.map((m) => KIND_SHORT[m.kind]))].join(" ");
-                const detail = c.entries.map((m) => `${m.kind.replace(/_/g, " ")} ${cr(m.amount_cr)} (as of ${m.as_of})`).join("\n");
+                const kinds = [...new Set(c.entries.map((m) => label("kind_short", m.kind)))].join(" ");
+                const detail = c.entries.map((m) => `${label("kind", m.kind)} ${cr(m.amount_cr)} (as of ${m.as_of})`).join("\n");
                 return (
-                  <td class={`cell-${c.strength}`} title={`${c.fiscalYear} · ${STRENGTH_LABEL[c.strength!]}\n${detail}`}>
+                  <td class={`cell-${c.strength}`} title={`${c.fiscalYear} · ${label("source_strength", c.strength!)}\n${detail}`}>
                     {kinds}
                   </td>
                 );

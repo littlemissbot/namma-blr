@@ -1,5 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
+import { label } from "../i18n";
 import StageTracker from "../components/StageTracker.astro";
 import {
   getProjects,
@@ -41,7 +42,6 @@ const biggestMover = projects
 const uniqueSorted = (values: string[]) => [...new Set(values)].sort();
 const categories = uniqueSorted(projects.map((p) => p.category));
 const statuses = uniqueSorted(projects.map((p) => p.status));
-const label = (s: string) => s.replace(/_/g, " ");
 ---
 
 <Base title="Home">
@@ -130,14 +130,14 @@ const label = (s: string) => s.replace(/_/g, " ");
               <span>Category</span>
               <select id="cf-category">
                 <option value="">All</option>
-                {categories.map((c) => <option value={c}>{label(c)}</option>)}
+                {categories.map((c) => <option value={c}>{label("category", c)}</option>)}
               </select>
             </label>
             <label>
               <span>Status</span>
               <select id="cf-status">
                 <option value="">All</option>
-                {statuses.map((s) => <option value={s}>{label(s)}</option>)}
+                {statuses.map((s) => <option value={s}>{label("status", s)}</option>)}
               </select>
             </label>
             <button type="button" id="cf-reset" class="btn">Reset</button>
@@ -150,12 +150,12 @@ const label = (s: string) => s.replace(/_/g, " ");
             const sourceCount = getProjectSourceIds(p.id).length;
             return (
               <a class="case-file card" href={`/projects/${p.id}`} data-category={p.category} data-status={p.status}>
-                <p class="case-file-category">{p.category.replace(/_/g, " ")}</p>
+                <p class="case-file-category">{label("category", p.category)}</p>
                 <h3>{p.name}</h3>
                 <p class="case-file-scope">{p.scope}</p>
                 <div class="pill-row case-file-pills">
-                  <span class={`status-tab status-${p.status}`}>{p.status.replace(/_/g, " ")}</span>
-                  <span class={`confidence confidence-${p.confidence}`}>{p.confidence}</span>
+                  <span class={`status-tab status-${p.status}`}>{label("status", p.status)}</span>
+                  <span class={`confidence confidence-${p.confidence}`}>{label("confidence", p.confidence)}</span>
                   <span class="confidence source-pill">{sourceCount} source{sourceCount === 1 ? "" : "s"}</span>
                 </div>
                 <div class="stat-grid case-file-stats">

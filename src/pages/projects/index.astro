@@ -1,5 +1,6 @@
 ---
 import Base from "../../layouts/Base.astro";
+import { label } from "../../i18n";
 import { getProjects, latestCost, overrunPct, slippageMonths, isStale, getProjectSourceIds, agencyLabel } from "../../lib/data";
 
 const projects = getProjects();
@@ -18,7 +19,6 @@ const categories = uniqueSorted(rows.map((r) => r.project.category));
 const statuses = uniqueSorted(rows.map((r) => r.project.status));
 const confidences = ["high", "medium", "low"].filter((c) => rows.some((r) => r.project.confidence === c));
 
-const label = (s: string) => s.replace(/_/g, " ");
 ---
 
 <Base title="Projects">
@@ -50,21 +50,21 @@ const label = (s: string) => s.replace(/_/g, " ");
             <span>Category</span>
             <select id="f-category">
               <option value="">All</option>
-              {categories.map((c) => <option value={c}>{label(c)}</option>)}
+              {categories.map((c) => <option value={c}>{label("category", c)}</option>)}
             </select>
           </label>
           <label>
             <span>Status</span>
             <select id="f-status">
               <option value="">All</option>
-              {statuses.map((s) => <option value={s}>{label(s)}</option>)}
+              {statuses.map((s) => <option value={s}>{label("status", s)}</option>)}
             </select>
           </label>
           <label>
             <span>Confidence</span>
             <select id="f-confidence">
               <option value="">All</option>
-              {confidences.map((c) => <option value={c}>{label(c)}</option>)}
+              {confidences.map((c) => <option value={c}>{label("confidence", c)}</option>)}
             </select>
           </label>
           <button type="button" id="f-reset" class="btn">Reset</button>
@@ -106,13 +106,13 @@ const label = (s: string) => s.replace(/_/g, " ");
                   <td data-cell="agency">{agencyLabel(project)}</td>
                   <td class="num" data-cell="cost">{cost ? `₹${cost.amount_cr.toLocaleString("en-IN")} cr` : "no data"}</td>
                   <td class="num" data-cell="overrun">{overrun === null ? "no data" : `${overrun >= 0 ? "+" : ""}${overrun.toFixed(1)}%`}</td>
-                  <td data-cell="status"><span class={`status-tab status-${project.status}`}>{project.status.replace(/_/g, " ")}</span></td>
+                  <td data-cell="status"><span class={`status-tab status-${project.status}`}>{label("status", project.status)}</span></td>
                   <td class="num" data-cell="slippage">{slippage === null ? "no data" : `${slippage} mo`}</td>
                   <td data-cell="verified">
                     {project.verified_on}
                     {stale && <span title="Not re-verified in the last two quarterly cycles"> ⚠</span>}
                   </td>
-                  <td data-cell="confidence"><span class={`confidence confidence-${project.confidence}`}>{project.confidence}</span></td>
+                  <td data-cell="confidence"><span class={`confidence confidence-${project.confidence}`}>{label("confidence", project.confidence)}</span></td>
                   <td class="num" data-cell="sources">{sources}</td>
                 </tr>
               ))}

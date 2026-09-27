@@ -1,4 +1,5 @@
 ---
+import { label } from "../i18n";
 // A Namma Metro line-diagram, repurposed: stops instead of stations,
 // filled up to the project's current build stage. Renders nothing for
 // stalled/cancelled projects — we don't record which stage they stalled at,
@@ -17,7 +18,7 @@ const current = stageIndex(status);
 {
   current !== null && (
     <div>
-      <div class="stage-tracker" role="img" aria-label={`Build stage: ${status.replace(/_/g, " ")}`}>
+      <div class="stage-tracker" role="img" aria-label={`Build stage: ${label("status", status)}`}>
         {STAGE_ORDER.map((stage, i) => (
           <>
             {i > 0 && <span class={`seg ${i <= current ? "filled" : ""}`} />}
@@ -28,7 +29,7 @@ const current = stageIndex(status);
       {showLabels && (
         <div class="stage-labels">
           <span>
-            Stage {current + 1} of {STAGE_ORDER.length}: {status.replace(/_/g, " ")}
+            Stage {current + 1} of {STAGE_ORDER.length}: {label("status", status)}
           </span>
         </div>
       )}

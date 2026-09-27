@@ -1,0 +1,113 @@
+{
+  "site": {
+    "name": "NammaBLR",
+    "title_suffix": "· NammaBLR"
+  },
+  "nav": {
+    "projects": "Projects",
+    "changes": "What changed",
+    "coverage": "Coverage",
+    "about": "About the data",
+    "corrections": "Corrections"
+  },
+  "footer": {
+    "disclaimer": "This site compiles publicly available information about infrastructure projects in Bengaluru. Every figure is shown with its source and the date it was recorded. An allocation is not evidence that money was spent, and a delay is not evidence of wrongdoing. We do not allege misconduct by any individual, official, department or contractor.",
+    "disclaimer_link": "Full disclaimer and sourcing",
+    "corrections_link": "Corrections log",
+    "cadence": "Updated quarterly, in January, April, July and October. Next sweep due {date}. Each project also shows the date it was last checked.",
+    "changelog_link": "Changelog",
+    "rss_link": "RSS",
+    "ticker": "Updated quarterly. Next sweep due {date}."
+  },
+  "common": {
+    "all": "All",
+    "no_data": "no data",
+    "reset": "Reset"
+  },
+  "labels": {
+    "status": {
+      "announced": "announced",
+      "sanctioned": "sanctioned",
+      "tendering": "tendering",
+      "awarded": "awarded",
+      "under_construction": "under construction",
+      "partially_open": "partially open",
+      "complete": "complete",
+      "stalled": "stalled",
+      "cancelled": "cancelled"
+    },
+    "category": {
+      "metro_rail": "metro rail",
+      "roads": "roads",
+      "buses": "buses",
+      "water_sewerage": "water and sewerage",
+      "drains_lakes": "drains and lakes",
+      "parks_public": "parks and public space"
+    },
+    "confidence": {
+      "high": "high",
+      "medium": "medium",
+      "low": "low"
+    },
+    "kind": {
+      "announced": "announced",
+      "sanctioned": "sanctioned",
+      "revised_cost": "revised cost",
+      "bid_received": "bid received",
+      "released": "released",
+      "utilised": "utilised"
+    },
+    "kind_short": {
+      "announced": "A",
+      "sanctioned": "S",
+      "revised_cost": "R",
+      "bid_received": "B",
+      "released": "Rel",
+      "utilised": "U"
+    },
+    "funder": {
+      "state": "state",
+      "centre": "centre",
+      "agency_borrowing": "agency borrowing",
+      "external": "external",
+      "private": "private"
+    },
+    "event_type": {
+      "announced": "Announced",
+      "sanctioned": "Sanctioned",
+      "tender_floated": "Tender floated",
+      "bid_received": "Bid received",
+      "awarded": "Awarded",
+      "deadline_revised": "Deadline revised",
+      "section_opened": "Section opened",
+      "cost_revised": "Cost revised",
+      "stalled": "Stalled",
+      "resumed": "Resumed",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "doc_type": {
+      "budget_document": "budget document",
+      "audit_report": "audit report",
+      "agency_report": "agency report",
+      "assembly_reply": "Assembly reply",
+      "rti_response": "RTI response",
+      "news": "news",
+      "press_release": "press release"
+    },
+    "source_strength": {
+      "primary": "primary document",
+      "news": "news only",
+      "press_release": "press release only"
+    },
+    "corporation": {
+      "Central": "Central",
+      "East": "East",
+      "North": "North",
+      "South": "South",
+      "West": "West",
+      "outside_GBA": "outside GBA",
+      "BBMP": "BBMP"
+    }
+  }
+}

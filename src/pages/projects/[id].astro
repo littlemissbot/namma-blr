@@ -1,5 +1,6 @@
 ---
 import Base from "../../layouts/Base.astro";
+import { label } from "../../i18n";
 import StageTracker from "../../components/StageTracker.astro";
 import {
   getProjects,
@@ -44,10 +45,10 @@ const slippage = slippageMonths(project);
     <div class="detail-main">
       <div class="card hero-card">
         <div class="pill-row hero-pills">
-          <span class={`status-tab status-${project.status}`}>{project.status.replace(/_/g, " ")}</span>
+          <span class={`status-tab status-${project.status}`}>{label("status", project.status)}</span>
           <span class="confidence">{agencyLabel(project)}</span>
-          <span class="confidence">{project.category.replace(/_/g, " ")}</span>
-          <span class={`confidence confidence-${project.confidence}`}>{project.confidence}</span>
+          <span class="confidence">{label("category", project.category)}</span>
+          <span class={`confidence confidence-${project.confidence}`}>{label("confidence", project.confidence)}</span>
         </div>
 
         <h1>{project.name}</h1>
@@ -118,10 +119,10 @@ const slippage = slippageMonths(project);
                 <tbody>
                   {money.map((m) => (
                     <tr>
-                      <td>{m.kind.replace(/_/g, " ")}{m.comparable_to_prior === false && " *"}</td>
+                      <td>{label("kind", m.kind)}{m.comparable_to_prior === false && " *"}</td>
                       <td>{m.fiscal_year}</td>
                       <td class="num">{cr(m.amount_cr)}</td>
-                      <td>{m.funder}{m.funder_detail ? ` — ${m.funder_detail}` : ""}</td>
+                      <td>{label("funder", m.funder)}{m.funder_detail ? ` — ${m.funder_detail}` : ""}</td>
                       <td>{m.as_of}</td>
                       <td><a href={`#source-${sourceRef(m.source_id)}`}>[{sourceRef(m.source_id)}]</a></td>
                     </tr>
@@ -176,7 +177,7 @@ const slippage = slippageMonths(project);
                   <div>
                     <a href={source!.url} target="_blank" rel="noopener">{source!.title}</a>
                     {source!.archive_url && <> (<a href={source!.archive_url} target="_blank" rel="noopener">archived copy</a>)</>}
-                    <div class="source-meta">{source!.publisher} · {source!.retrieved_on} · {source!.doc_type.replace(/_/g, " ")}</div>
+                    <div class="source-meta">{source!.publisher} · {source!.retrieved_on} · {label("doc_type", source!.doc_type)}</div>
                   </div>
                 </li>
               ))}
@@ -214,11 +215,11 @@ const slippage = slippageMonths(project);
             <dt>Agency</dt>
             <dd>{agencyLabel(project)}</dd>
           </div>
-          <div><dt>Category</dt><dd>{project.category.replace(/_/g, " ")}</dd></div>
+          <div><dt>Category</dt><dd>{label("category", project.category)}</dd></div>
           {project.agency !== "corporation" && (
-            <div><dt>Corporation</dt><dd>{project.corporation.replace(/_/g, " ")}</dd></div>
+            <div><dt>Corporation</dt><dd>{label("corporation", project.corporation)}</dd></div>
           )}
-          <div><dt>Confidence</dt><dd>{project.confidence}</dd></div>
+          <div><dt>Confidence</dt><dd>{label("confidence", project.confidence)}</dd></div>
           <div><dt>Sources cited</dt><dd>{sources.length}</dd></div>
         </dl>
       </div>

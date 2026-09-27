@@ -1,6 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
-import { getChanges, agencyLabel, EVENT_TYPE_LABEL } from "../lib/data";
+import { getChanges, agencyLabel } from "../lib/data";
+import { label } from "../i18n";
 
 const changes = getChanges();
 const years = [...new Set(changes.map((c) => c.event.date.slice(0, 4)))];
@@ -8,7 +9,6 @@ const uniqueSorted = (values: string[]) => [...new Set(values)].sort();
 const agencies = uniqueSorted(changes.map((c) => c.project.agency));
 const categories = uniqueSorted(changes.map((c) => c.project.category));
 const types = uniqueSorted(changes.map((c) => c.event.type));
-const label = (s: string) => s.replace(/_/g, " ");
 const formatDate = (d: string) =>
   new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 ---
@@ -38,14 +38,14 @@ const formatDate = (d: string) =>
             <span>Category</span>
             <select id="c-category">
               <option value="">All</option>
-              {categories.map((c) => <option value={c}>{label(c)}</option>)}
+              {categories.map((c) => <option value={c}>{label("category", c)}</option>)}
             </select>
           </label>
           <label>
             <span>Type</span>
             <select id="c-type">
               <option value="">All</option>
-              {types.map((t) => <option value={t}>{EVENT_TYPE_LABEL[t]}</option>)}
+              {types.map((t) => <option value={t}>{label("event_type", t)}</option>)}
             </select>
           </label>
         </div>
@@ -66,7 +66,7 @@ const formatDate = (d: string) =>
                   >
                     <div class="change-meta">
                       <time datetime={event.date}>{formatDate(event.date)}</time>
-                      <span class="event-type">{EVENT_TYPE_LABEL[event.type]}</span>
+                      <span class="event-type">{label("event_type", event.type)}</span>
                     </div>
                     <a class="change-project" href={`/projects/${project.id}`}>{project.name}</a>
                     <span class="change-agency">{agencyLabel(project)}</span>
@@ -82,7 +82,7 @@ const formatDate = (d: string) =>
                       <p class="change-source">
                         Source: <a href={source.url} target="_blank" rel="noopener">{source.publisher}</a>
                         {source.archive_url && <> (<a href={source.archive_url} target="_blank" rel="noopener">archived</a>)</>}
-                        {" "}· {label(source.doc_type)}
+                        {" "}· {label("doc_type", source.doc_type)}
                       </p>
                     )}
                   </li>

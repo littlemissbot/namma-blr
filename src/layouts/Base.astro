@@ -8,6 +8,7 @@ import "@fontsource/ibm-plex-sans/500.css";
 import "@fontsource/ibm-plex-sans/600.css";
 import "../styles/global.css";
 import { nextUpdateDue } from "../lib/data";
+import { t } from "../i18n";
 
 interface Props {
   title: string;
@@ -25,7 +26,7 @@ const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWit
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title} · NammaBLR</title>
+    <title>{title} {t("site.title_suffix")}</title>
     <link rel="alternate" type="application/rss+xml" title="NammaBLR: what changed" href="/changes.xml" />
     <style>
       /* ---- Header: a row of filed tabs, not a nav bar ---- */
@@ -130,7 +131,7 @@ const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWit
     <div class="cadence-strip" hidden>
       <div class="ticker">
         <div class="ticker-track">
-          <span class="ticker-item">Updated quarterly. Next sweep due {nextDueLabel}.</span>
+          <span class="ticker-item">{t("footer.ticker", { date: nextDueLabel })}</span>
         </div>
       </div>
     </div>
@@ -138,11 +139,11 @@ const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWit
       <div class="wrap">
         <a class="wordmark" href="/">Namma<span>BLR</span></a>
         <nav class="site-nav">
-          <a href="/projects" aria-current={isActive("/projects") ? "page" : undefined}>Projects</a>
-          <a href="/changes" aria-current={isActive("/changes") ? "page" : undefined}>What changed</a>
-          <a href="/coverage" aria-current={isActive("/coverage") ? "page" : undefined}>Coverage</a>
-          <a href="/about-the-data" aria-current={isActive("/about-the-data") ? "page" : undefined}>About the data</a>
-          <a href="/corrections" aria-current={isActive("/corrections") ? "page" : undefined}>Corrections</a>
+          <a href="/projects" aria-current={isActive("/projects") ? "page" : undefined}>{t("nav.projects")}</a>
+          <a href="/changes" aria-current={isActive("/changes") ? "page" : undefined}>{t("nav.changes")}</a>
+          <a href="/coverage" aria-current={isActive("/coverage") ? "page" : undefined}>{t("nav.coverage")}</a>
+          <a href="/about-the-data" aria-current={isActive("/about-the-data") ? "page" : undefined}>{t("nav.about")}</a>
+          <a href="/corrections" aria-current={isActive("/corrections") ? "page" : undefined}>{t("nav.corrections")}</a>
         </nav>
       </div>
     </header>
@@ -152,17 +153,12 @@ const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWit
     <footer class="site-footer">
       <div class="wrap">
         <p>
-          This site compiles publicly available information about infrastructure projects in
-          Bengaluru. Every figure is shown with its source and the date it was recorded. An
-          allocation is not evidence that money was spent, and a delay is not evidence of
-          wrongdoing. We do not allege misconduct by any individual, official, department or
-          contractor. <a href="/about-the-data">Full disclaimer and sourcing</a> ·{" "}
-          <a href="/corrections">Corrections log</a>
+          {t("footer.disclaimer")} <a href="/about-the-data">{t("footer.disclaimer_link")}</a> ·{" "}
+          <a href="/corrections">{t("footer.corrections_link")}</a>
         </p>
         <p class="cadence-line">
-          Updated quarterly, in January, April, July and October. Next sweep due {nextDueLabel}.
-          Each project also shows the date it was last checked. <a href="/changelog">Changelog</a> ·{" "}
-          <a href="/changes.xml">RSS</a>
+          {t("footer.cadence", { date: nextDueLabel })} <a href="/changelog">{t("footer.changelog_link")}</a> ·{" "}
+          <a href="/changes.xml">{t("footer.rss_link")}</a>
         </p>
       </div>
     </footer>

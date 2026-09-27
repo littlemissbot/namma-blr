@@ -14,6 +14,9 @@ lands.
   default and `kn` under `/kn/`.
 - Keep interface strings in `src/i18n/{en,kn}.json`. Status, kind and
   confidence labels are translated once, centrally.
+- Long page prose (the about page, page introductions) stays in the pages and
+  is translated as whole per-language pages under `src/pages/kn/`, not as
+  hundreds of JSON keys. That keeps it editable as prose in both languages.
 - Data stays in English. Add optional `name_kn` to projects. Take Kannada ward
   names from the official delimitation notification where it gives them
   (Plan 2).
@@ -29,7 +32,7 @@ Interface, disclaimer and project status labels.
 
 ## Issues to open
 
-- [ ] Now: move interface strings into `src/i18n/en.json` (no routing yet)
+- [x] Now: move interface strings into `src/i18n/en.json` (no routing yet). Nav, footer and every enum label go through `t()`/`label()` in `src/i18n/index.ts`; a test fails if a schema value has no label
 - [ ] Later: i18n routing + `kn` strings + language switcher
 - [ ] Kannada font subset
 - [ ] Translate interface, status labels and disclaimer, with native-speaker review

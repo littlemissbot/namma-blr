@@ -3,6 +3,8 @@
 // slippage). Validation of the raw records happens separately in
 // scripts/validate.mjs — this module assumes clean data.
 
+import { label } from "../i18n";
+
 export type Confidence = "high" | "medium" | "low";
 
 export interface Project {
@@ -226,7 +228,7 @@ export function agencyLabel(project: Project): string {
   if (project.agency !== "corporation") return project.agency;
   // Records from before the 2025 GBA restructuring belong to the single BBMP.
   if (project.corporation === "BBMP") return "BBMP";
-  return `Bengaluru ${project.corporation.replace(/_/g, " ")} City Corporation`;
+  return `Bengaluru ${label("corporation", project.corporation)} City Corporation`;
 }
 
 /** A project's verified_on is stale if the site's quarterly cycle has turned over twice since (spec P7/§6.2). */
@@ -351,22 +353,6 @@ export function coverageMatrix() {
     },
   };
 }
-
-/** Plain-language labels for event types (spec §3.3). */
-export const EVENT_TYPE_LABEL: Record<Event["type"], string> = {
-  announced: "Announced",
-  sanctioned: "Sanctioned",
-  tender_floated: "Tender floated",
-  bid_received: "Bid received",
-  awarded: "Awarded",
-  deadline_revised: "Deadline revised",
-  section_opened: "Section opened",
-  cost_revised: "Cost revised",
-  stalled: "Stalled",
-  resumed: "Resumed",
-  completed: "Completed",
-  cancelled: "Cancelled",
-};
 
 export interface Change {
   event: Event;

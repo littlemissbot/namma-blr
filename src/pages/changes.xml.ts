@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
-import { getChanges, agencyLabel, EVENT_TYPE_LABEL } from "../lib/data";
+import { getChanges, agencyLabel } from "../lib/data";
+import { label } from "../i18n";
 
 const escape = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -11,9 +12,9 @@ export const GET: APIRoute = ({ site }) => {
   const items = changes
     .map(({ event, project, source, id }) => {
       const link = new URL(`/projects/${project.id}`, base).href;
-      const attribution = source ? ` Source: ${source.publisher} (${source.doc_type.replace(/_/g, " ")}).` : "";
+      const attribution = source ? ` Source: ${source.publisher} (${label("doc_type", source.doc_type)}).` : "";
       return `    <item>
-      <title>${escape(`${EVENT_TYPE_LABEL[event.type]}: ${project.name}`)}</title>
+      <title>${escape(`${label("event_type", event.type)}: ${project.name}`)}</title>
       <link>${escape(link)}</link>
       <guid isPermaLink="false">${escape(id)}</guid>
       <pubDate>${new Date(event.date).toUTCString()}</pubDate>
