@@ -1,0 +1,411 @@
+---
+import Base from "../layouts/Base.astro";
+import { getProjects, getProjectGeometries } from "../lib/data";
+import { t, label } from "../i18n";
+
+const projects = getProjects();
+const mappedIds = new Set(getProjectGeometries().map((g) => g.projectId));
+const mapped = projects.filter((p) => mappedIds.has(p.id)).length;
+const agencies = [...new Set(projects.map((p) => p.agency))].sort();
+
+// Split a string around its {table_link} placeholder so the link can be real markup.
+const [coverageBefore, coverageAfter] = (
+  mapped === 0 ? t("map.coverage_none") : t("map.coverage", { mapped, total: projects.length })
+).split("{table_link}");
+
+const STATUS_GROUPS = [
+  ["announced", "announced"],
+  ["sanctioned", "sanctioned"],
+  ["progress", "under_construction"],
+  ["complete", "complete"],
+  ["stalled", "stalled"],
+] as const;
+---
+
+<Base title={t("map.title")}>
+  <h1>{t("map.title")} <span class="beta-badge">{t("map.beta")}</span></h1>
+  <p>{t("map.intro")}</p>
+  <p class="beta-note">
+    {coverageBefore}<a href="/projects">{t("map.table_link")}</a>{coverageAfter}
+  </p>
+
+  <div class="map-controls">
+    <label>
+      <span>{t("map.ward_layer")}</span>
+      <select id="m-wards">
+        <option value="bbmp243" selected>{t("map.ward_bbmp243")}</option>
+        <option value="bbmp198">{t("map.ward_bbmp198")}</option>
+        <option value="">{t("map.ward_none")}</option>
+      </select>
+    </label>
+    <label>
+      <span>{t("map.agency")}</span>
+      <select id="m-agency">
+        <option value="">{t("common.all")}</option>
+        {agencies.map((a) => <option value={a}>{a}</option>)}
+      </select>
+    </label>
+    <button type="button" id="m-locate" class="btn">{t("map.locate")}</button>
+  </div>
+
+  <div id="map" class="map" role="region" aria-label={t("map.title")}></div>
+  <noscript><p>{t("map.noscript")} <a href="/projects">{t("map.table_link")}</a></p></noscript>
+  <p id="m-basemap-down" class="map-notice" hidden>{t("map.basemap_down")}</p>
+
+  <div class="map-below">
+    <section id="m-panel" class="card map-panel" aria-live="polite">
+      <p class="muted">{t("map.panel_hint")}</p>
+    </section>
+
+    <aside class="card map-legend">
+      <p class="legend-title">{t("map.legend_status")}</p>
+      <ul>
+        {STATUS_GROUPS.map(([group, status]) => (
+          <li><i class={`swatch swatch-${group}`}></i>{label("status", status)}{group === "sanctioned" ? " / tendering / awarded" : group === "progress" ? " / partially open" : group === "stalled" ? " / cancelled" : ""}</li>
+        ))}
+      </ul>
+      <p class="legend-title">{t("map.legend_confidence")}</p>
+      <ul>
+        <li><i class="line line-high"></i>{t("map.confidence_high")}</li>
+        <li><i class="line line-medium"></i>{t("map.confidence_medium")}</li>
+        <li><i class="line line-low"></i>{t("map.confidence_low")}</li>
+        <li><i class="dot-approx"></i>{t("map.approximate")}</li>
+      </ul>
+      <p class="privacy">{t("map.privacy")}</p>
+    </aside>
+  </div>
+</Base>
+
+<style>
+  .beta-badge {
+    display: inline-block;
+    vertical-align: middle;
+    font-family: var(--font-body, inherit);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-pill);
+    border: 1.5px dashed var(--accent);
+    color: var(--accent);
+  }
+  .beta-note {
+    border-left: 3px solid var(--accent);
+    padding: 0.4rem 0 0.4rem 0.8rem;
+  }
+  .map-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem 1rem;
+    margin: 1rem 0 0.75rem;
+  }
+  .map-controls label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.82rem; color: var(--ink-muted); }
+  .map {
+    width: 100%;
+    height: min(70vh, 640px);
+    min-height: 360px;
+    border: 1px solid var(--rule-strong);
+    border-radius: 8px;
+    background: var(--paper-raised);
+  }
+  .map-notice { font-size: 0.85rem; color: var(--ink-muted); }
+  .map-below {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  @media (max-width: 760px) {
+    .map { height: 60vh; }
+    .map-below { grid-template-columns: 1fr; }
+  }
+  .map-panel, .map-legend { padding: 1rem 1.1rem; }
+  .muted { color: var(--ink-muted); }
+  .legend-title { font-weight: 600; font-size: 0.85rem; margin: 0 0 0.4rem; }
+  .map-legend ul { list-style: none; margin: 0 0 0.9rem; padding: 0; font-size: 0.82rem; display: grid; gap: 0.3rem; }
+  .map-legend li { display: flex; align-items: center; gap: 0.5rem; }
+  .swatch { width: 0.9rem; height: 0.9rem; border-radius: 50%; flex: none; }
+  .swatch-announced { background: var(--status-announced); }
+  .swatch-sanctioned { background: var(--status-sanctioned); }
+  .swatch-progress { background: var(--status-progress); }
+  .swatch-complete { background: var(--status-complete); }
+  .swatch-stalled { background: var(--status-stalled); }
+  .line { width: 2rem; flex: none; border-top: 3px solid var(--ink); }
+  .line-medium { border-top-style: dashed; }
+  .line-low { border-top-style: dotted; }
+  .dot-approx {
+    width: 0.9rem;
+    height: 0.9rem;
+    flex: none;
+    border-radius: 50%;
+    border: 2px dashed var(--ink);
+    margin: 0 0.55rem;
+  }
+  .privacy { font-size: 0.78rem; color: var(--ink-muted); margin: 0; }
+
+  :global(.map-panel h2) { margin: 0 0 0.25rem; font-size: 1.15rem; }
+  :global(.map-panel .meta) { font-size: 0.82rem; color: var(--ink-muted); margin: 0 0 0.5rem; }
+  :global(.map-panel ul) { margin: 0.25rem 0 0; padding-left: 1.1rem; }
+  :global(.map-panel dl) { display: grid; grid-template-columns: auto 1fr; gap: 0.2rem 0.75rem; margin: 0.5rem 0; font-size: 0.9rem; }
+  :global(.map-panel dt) { color: var(--ink-muted); }
+  :global(.map-panel dd) { margin: 0; font-weight: 600; }
+  :global(.maplibregl-popup-content) { font: 0.85rem/1.35 var(--font-body, sans-serif); color: #1d1a14; }
+</style>
+
+<script>
+  import * as maplibregl from "maplibre-gl";
+  // MapLibre v6 ships its web worker as a separate ES module; let Vite bundle it and hand MapLibre the URL.
+  import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
+  import "maplibre-gl/dist/maplibre-gl.css";
+  import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
+  import { t } from "../i18n";
+
+  maplibregl.setWorkerUrl(workerUrl);
+
+  const STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
+  const BENGALURU: [number, number] = [77.5946, 12.9716];
+
+  type WardScheme = "bbmp243" | "bbmp198";
+  const params = new URLSearchParams(location.search);
+  const panel = document.getElementById("m-panel")!;
+  const wardSelect = document.getElementById("m-wards") as HTMLSelectElement;
+  const agencySelect = document.getElementById("m-agency") as HTMLSelectElement;
+  const locateBtn = document.getElementById("m-locate") as HTMLButtonElement;
+
+  const css = getComputedStyle(document.documentElement);
+  const cssVar = (name: string, fallback: string) => css.getPropertyValue(name).trim() || fallback;
+  const STATUS_COLOUR = [
+    "match",
+    ["get", "status_group"],
+    "announced", cssVar("--status-announced", "#8a8065"),
+    "sanctioned", cssVar("--status-sanctioned", "#35577a"),
+    "progress", cssVar("--status-progress", "#b4791a"),
+    "complete", cssVar("--status-complete", "#1e4b3c"),
+    cssVar("--status-stalled", "#8c2f2f"),
+  ] as any;
+  const INK = cssVar("--ink", "#1d1a14");
+  const RULE = cssVar("--rule-strong", "#8f835f");
+  const ACCENT = cssVar("--accent", "#a3322a");
+
+  const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+
+  /** OpenFreeMap style, or a plain background if the tiles can't be reached (spec: the map must still work). */
+  async function loadStyle(): Promise<any> {
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 8000);
+      const res = await fetch(STYLE_URL, { signal: ctrl.signal });
+      clearTimeout(timer);
+      if (!res.ok) throw new Error(String(res.status));
+      return await res.json();
+    } catch {
+      document.getElementById("m-basemap-down")!.hidden = false;
+      return {
+        version: 8,
+        sources: {},
+        layers: [{ id: "background", type: "background", paint: { "background-color": cssVar("--paper-raised", "#f8f4e8") } }],
+      };
+    }
+  }
+
+  const wardCache = new Map<WardScheme, any>();
+  async function loadWards(scheme: WardScheme) {
+    if (!wardCache.has(scheme)) wardCache.set(scheme, await (await fetch(`/geo/wards-${scheme}.json`)).json());
+    return wardCache.get(scheme);
+  }
+
+  const map = new maplibregl.Map({
+    container: "map",
+    style: await loadStyle(),
+    center: BENGALURU,
+    zoom: 10.3,
+    minZoom: 8,
+    maxBounds: [[76.6, 12.4], [78.6, 13.6]],
+    attributionControl: { compact: true },
+    // On touch screens one finger scrolls the page and two move the map, so the map never traps scrolling.
+    cooperativeGestures: matchMedia("(pointer: coarse)").matches,
+  });
+  map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+
+  let projects: any = { type: "FeatureCollection", features: [] };
+
+  map.on("load", async () => {
+    projects = await (await fetch("/geo/projects.geojson")).json();
+
+    // Ward layers first, so projects draw on top.
+    for (const scheme of ["bbmp243", "bbmp198"] as WardScheme[]) {
+      map.addSource(`wards-${scheme}`, { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      map.addLayer({ id: `wards-${scheme}-line`, type: "line", source: `wards-${scheme}`, layout: { visibility: "none" }, paint: { "line-color": RULE, "line-width": 0.7, "line-opacity": 0.8 } });
+      map.addLayer({ id: `wards-${scheme}-selected`, type: "line", source: `wards-${scheme}`, filter: ["==", ["get", "code"], ""], paint: { "line-color": INK, "line-width": 3 } });
+    }
+
+    map.addSource("projects", { type: "geojson", data: projects });
+    const isType = (...types: string[]) => ["in", ["geometry-type"], ["literal", types]] as any;
+    map.addLayer({ id: "projects-fill", type: "fill", source: "projects", filter: isType("Polygon", "MultiPolygon"), paint: { "fill-color": STATUS_COLOUR, "fill-opacity": 0.25 } });
+    // Line style carries confidence (spec §5.1): solid high, dashed medium, dotted low.
+    const dash: Record<string, number[] | undefined> = { high: undefined, medium: [2, 1.5], low: [0.4, 1.6] };
+    for (const conf of ["high", "medium", "low"]) {
+      map.addLayer({
+        id: `projects-line-${conf}`,
+        type: "line",
+        source: "projects",
+        filter: ["all", isType("LineString", "MultiLineString", "Polygon", "MultiPolygon"), ["==", ["get", "confidence"], conf]],
+        layout: { "line-cap": conf === "low" ? "round" : "butt" },
+        paint: { "line-color": STATUS_COLOUR, "line-width": 4, ...(dash[conf] ? { "line-dasharray": dash[conf] } : {}) },
+      });
+    }
+    // Approximate locations get a wide dashed-looking halo so they never read as surveyed points.
+    map.addLayer({ id: "projects-approx", type: "circle", source: "projects", filter: ["all", isType("Point", "MultiPoint"), ["==", ["get", "geometry_basis"], "approximate"]], paint: { "circle-radius": 16, "circle-color": STATUS_COLOUR, "circle-opacity": 0.15, "circle-stroke-color": STATUS_COLOUR, "circle-stroke-width": 1.5 } });
+    map.addLayer({ id: "projects-point", type: "circle", source: "projects", filter: isType("Point", "MultiPoint"), paint: { "circle-radius": 6, "circle-color": STATUS_COLOUR, "circle-stroke-color": "#fff", "circle-stroke-width": 1.5 } });
+
+    await setWardLayer((wardSelect.value || "") as WardScheme | "");
+    applyAgencyFilter();
+
+    const wanted = params.get("project");
+    if (wanted) {
+      const f = projects.features.find((f: any) => f.properties.id === wanted);
+      if (f) showProject(f.properties);
+    }
+    const ward = params.get("ward");
+    if (ward && /^bbmp(243|198):\d+$/.test(ward)) {
+      const scheme = ward.split(":")[0] as WardScheme;
+      wardSelect.value = scheme;
+      await setWardLayer(scheme);
+      const fc = await loadWards(scheme);
+      const feature = fc.features.find((f: any) => f.properties.code === ward);
+      if (feature) showWard(scheme, feature, false);
+    }
+  });
+
+  const PROJECT_LAYERS = ["projects-fill", "projects-line-high", "projects-line-medium", "projects-line-low", "projects-approx", "projects-point"];
+
+  function applyAgencyFilter() {
+    const agency = agencySelect.value;
+    const src = map.getSource("projects") as maplibregl.GeoJSONSource | undefined;
+    src?.setData(agency ? { ...projects, features: projects.features.filter((f: any) => f.properties.agency === agency) } : projects);
+  }
+  agencySelect.addEventListener("input", applyAgencyFilter);
+
+  async function setWardLayer(scheme: WardScheme | "") {
+    for (const s of ["bbmp243", "bbmp198"]) {
+      if (map.getLayer(`wards-${s}-line`)) map.setLayoutProperty(`wards-${s}-line`, "visibility", s === scheme ? "visible" : "none");
+      if (map.getLayer(`wards-${s}-selected`)) map.setFilter(`wards-${s}-selected`, ["==", ["get", "code"], ""]);
+    }
+    if (scheme) (map.getSource(`wards-${scheme}`) as maplibregl.GeoJSONSource).setData(await loadWards(scheme));
+  }
+  wardSelect.addEventListener("input", () => setWardLayer(wardSelect.value as WardScheme | ""));
+
+  function setUrl(key: "project" | "ward", value: string) {
+    const next = new URLSearchParams();
+    next.set(key, value);
+    history.replaceState(null, "", `${location.pathname}?${next}`);
+  }
+
+  function showProject(p: any) {
+    panel.innerHTML = `
+      <h2>${esc(p.name)}</h2>
+      <p class="meta">${esc(p.agency_label)} · ${esc(p.status_label)}${p.geometry_basis === "approximate" ? ` · ${esc(t("map.approximate"))}` : ""}</p>
+      <dl>
+        <dt>${esc(t("map.latest_cost"))}</dt><dd>${esc(p.cost_label)}</dd>
+        <dt>${esc(t("map.verified_on"))}</dt><dd>${esc(p.verified_on)}${p.stale === true || p.stale === "true" ? ` (${esc(t("map.stale"))})` : ""}</dd>
+      </dl>
+      <a href="/projects/${encodeURIComponent(p.id)}">${esc(t("map.open_project"))} →</a>`;
+    setUrl("project", p.id);
+  }
+
+  function showWard(scheme: WardScheme, ward: any, move = true) {
+    const { code, ward_no, name } = ward.properties;
+    map.setFilter(`wards-${scheme}-selected`, ["==", ["get", "code"], code]);
+    const inWard = projects.features
+      .filter((f: any) => {
+        const wards = typeof f.properties.wards === "string" ? JSON.parse(f.properties.wards) : f.properties.wards;
+        return wards?.includes(code);
+      })
+      .map((f: any) => f.properties);
+    const unique = [...new Map(inWard.map((p: any) => [p.id, p])).values()] as any[];
+    panel.innerHTML = `
+      <h2>${esc(t("map.ward_result", { number: ward_no, name: name ?? "" }))}</h2>
+      <p class="meta">${esc(t(`map.ward_scheme_${scheme}`))}. ${esc(t("map.gba_pending"))}</p>
+      <p><strong>${esc(t("map.ward_projects"))}</strong></p>
+      ${
+        unique.length
+          ? `<ul>${unique.map((p) => `<li><a href="/projects/${encodeURIComponent(p.id)}">${esc(p.name)}</a> (${esc(p.status_label)})</li>`).join("")}</ul>`
+          : `<p class="muted">${esc(t("map.ward_no_projects"))}</p>`
+      }`;
+    setUrl("ward", code);
+    if (move) {
+      const [x0, y0, x1, y1] = bboxOf(ward.geometry);
+      map.fitBounds([[x0, y0], [x1, y1]], { padding: 40, maxZoom: 14 });
+    }
+  }
+
+  function bboxOf(geometry: any): [number, number, number, number] {
+    let b: [number, number, number, number] = [Infinity, Infinity, -Infinity, -Infinity];
+    const walk = (c: any) => {
+      if (typeof c[0] === "number") b = [Math.min(b[0], c[0]), Math.min(b[1], c[1]), Math.max(b[2], c[0]), Math.max(b[3], c[1])];
+      else c.forEach(walk);
+    };
+    walk(geometry.coordinates);
+    return b;
+  }
+
+  async function lookupWard(lngLat: [number, number]) {
+    const scheme = (wardSelect.value || "bbmp243") as WardScheme;
+    if (!wardSelect.value) {
+      wardSelect.value = scheme;
+      await setWardLayer(scheme);
+    }
+    const fc = await loadWards(scheme);
+    const ward = fc.features.find((f: any) => booleanPointInPolygon(lngLat, f));
+    if (ward) showWard(scheme, ward, false);
+    else panel.innerHTML = `<p class="muted">${esc(t("map.outside_wards"))}</p>`;
+  }
+
+  map.on("click", (e) => {
+    const hit = map.queryRenderedFeatures(e.point, { layers: PROJECT_LAYERS.filter((l) => map.getLayer(l)) })[0];
+    if (hit) showProject(hit.properties);
+    else lookupWard([e.lngLat.lng, e.lngLat.lat]);
+  });
+
+  // Hover card on devices with a mouse (spec §5.1: name, latest cost, status).
+  const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 10 });
+  for (const layer of PROJECT_LAYERS) {
+    map.on("mousemove", layer, (e) => {
+      const p = e.features?.[0]?.properties;
+      if (!p) return;
+      map.getCanvas().style.cursor = "pointer";
+      popup.setLngLat(e.lngLat).setHTML(`<strong>${esc(p.name)}</strong><br>${esc(p.cost_label)}<br>${esc(p.status_label)}`).addTo(map);
+    });
+    map.on("mouseleave", layer, () => {
+      map.getCanvas().style.cursor = "";
+      popup.remove();
+    });
+  }
+
+  let marker: maplibregl.Marker | null = null;
+  locateBtn.addEventListener("click", () => {
+    if (!("geolocation" in navigator)) {
+      panel.innerHTML = `<p class="muted">${esc(t("map.locate_error"))}</p>`;
+      return;
+    }
+    locateBtn.disabled = true;
+    locateBtn.textContent = t("map.locating");
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const here: [number, number] = [pos.coords.longitude, pos.coords.latitude];
+        marker?.remove();
+        marker = new maplibregl.Marker({ color: ACCENT }).setLngLat(here).addTo(map);
+        map.flyTo({ center: here, zoom: 14 });
+        await lookupWard(here);
+        locateBtn.disabled = false;
+        locateBtn.textContent = t("map.locate");
+      },
+      () => {
+        panel.innerHTML = `<p class="muted">${esc(t("map.locate_error"))}</p>`;
+        locateBtn.disabled = false;
+        locateBtn.textContent = t("map.locate");
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+    );
+  });
+</script>

@@ -140,6 +140,7 @@ const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWit
         <a class="wordmark" href="/">Namma<span>BLR</span></a>
         <nav class="site-nav">
           <a href="/projects" aria-current={isActive("/projects") ? "page" : undefined}>{t("nav.projects")}</a>
+          <a href="/map" aria-current={isActive("/map") ? "page" : undefined}>{t("nav.map")}</a>
           <a href="/changes" aria-current={isActive("/changes") ? "page" : undefined}>{t("nav.changes")}</a>
           <a href="/coverage" aria-current={isActive("/coverage") ? "page" : undefined}>{t("nav.coverage")}</a>
           <a href="/about-the-data" aria-current={isActive("/about-the-data") ? "page" : undefined}>{t("nav.about")}</a>

@@ -375,3 +375,23 @@ export function getChanges(): Change[] {
     }))
     .sort((a, b) => b.event.date.localeCompare(a.event.date) || a.project.name.localeCompare(b.project.name));
 }
+
+// Project geometry lives in data/geometry/<project-id>.geojson (docs/plans/02 §2).
+const geometryModules = import.meta.glob<string>("/data/geometry/*.geojson", { eager: true, query: "?raw", import: "default" });
+
+/** Every project geometry file as { projectId, geojson }. */
+export function getProjectGeometries(): { projectId: string; geojson: any }[] {
+  return Object.entries(geometryModules).map(([path, raw]) => ({
+    projectId: path.split("/").pop()!.replace(/\.geojson$/, ""),
+    geojson: JSON.parse(raw),
+  }));
+}
+
+/** Colour group for a status: the same five groups StageTracker and the status pills use. */
+export function statusGroup(status: Project["status"]): "announced" | "sanctioned" | "progress" | "complete" | "stalled" {
+  if (status === "announced") return "announced";
+  if (status === "sanctioned" || status === "tendering" || status === "awarded") return "sanctioned";
+  if (status === "under_construction" || status === "partially_open") return "progress";
+  if (status === "complete") return "complete";
+  return "stalled";
+}

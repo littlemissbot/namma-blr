@@ -61,11 +61,11 @@ Until then the map can be a preview route, unlisted and marked as a preview.
 
 ## Issues to open
 
-- [ ] PMTiles Bengaluru extract + muted style JSON
-- [ ] `/geo/projects.geojson` build endpoint
-- [ ] `/map` page (MapLibre island, layers, legend)
-- [ ] Status colours + confidence line styles shared with StageTracker
-- [ ] Hover and click cards
+- [x] Basemap: OpenFreeMap positron style by maintainer decision instead of self-hosted PMTiles, with a plain-background fallback when tiles can't load
+- [x] `/geo/projects.geojson` build endpoint
+- [x] `/map` page (MapLibre, layers, legend), public as a beta by maintainer decision
+- [x] Status colours + confidence line styles shared with StageTracker
+- [x] Hover and click cards
 - [ ] URL-synced filters
 - [ ] Project-page inset map
 - [ ] Performance budget: under 250 KB of JS and under 1.5 MB of first-load
