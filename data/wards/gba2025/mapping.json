@@ -1,0 +1,13 @@
+{
+  "source_file": "source/gba-369-wards-december-2025.geojson",
+  "simplify": "10%",
+  "fields": {
+    "ward_no": "ward_no",
+    "name": "ward_name",
+    "name_kn": "ward_name_kn",
+    "corporation_id": "corporation_id",
+    "corporation": "corporation",
+    "assembly_constituency": "assembly_constituency"
+  },
+  "corporations": { "1": "Central", "2": "North", "3": "East", "4": "South", "5": "West" }
+}

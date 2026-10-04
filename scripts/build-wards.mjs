@@ -105,6 +105,18 @@ export function normalise(scheme, raw, mapping) {
   return { type: "FeatureCollection", features };
 }
 
+/**
+ * Corporation outlines for the GBA scheme: each corporation's wards merged into
+ * one shape, simplified for the browser. Derived, so it always matches the wards.
+ */
+export async function dissolveCorporations(fc, percentage = "10%") {
+  const out = await mapshaper.applyCommands(
+    `-i in.json -dissolve corporation_id copy-fields=corporation -simplify ${percentage} keep-shapes -o out.json precision=0.00001`,
+    { "in.json": fc }
+  );
+  return JSON.parse(out["out.json"].toString());
+}
+
 /** Topology-preserving simplification for the browser copy (adjacent wards stay gap-free). */
 export async function simplify(fc, percentage = "10%") {
   const out = await mapshaper.applyCommands(
@@ -135,10 +147,19 @@ async function main() {
   const light = await simplify(wards, mapping.simplify ?? "10%");
   writeFileSync(publicPath, JSON.stringify(light));
 
+  let corporationsLine = "";
+  if (scheme === "gba2025") {
+    const corps = await dissolveCorporations(wards, mapping.simplify ?? "10%");
+    const corpPath = join(root, "public", "geo", "gba-corporations.json");
+    writeFileSync(corpPath, JSON.stringify(corps));
+    corporationsLine = `  public/geo/gba-corporations.json   ${corps.features.length} corporations`;
+  }
+
   const kb = (s) => `${Math.round(Buffer.byteLength(s) / 1024)} KB`;
   console.log(`${scheme}: ${wards.features.length} wards`);
   console.log(`  data/wards/${scheme}/wards.geojson  ${kb(JSON.stringify(wards))}`);
   console.log(`  public/geo/wards-${scheme}.json     ${kb(JSON.stringify(light))} (simplified ${mapping.simplify ?? "10%"})`);
+  if (corporationsLine) console.log(corporationsLine);
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) main();
