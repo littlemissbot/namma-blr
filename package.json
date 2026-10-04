@@ -18,6 +18,7 @@
     "assign-wards": "node scripts/assign-wards.mjs",
     "new": "node scripts/new-record.mjs",
     "fetch-osm": "node scripts/fetch-osm-geometry.mjs",
+    "fetch-lakes": "node scripts/fetch-osm-lakes.mjs",
     "test": "node --test test/*.test.mjs"
   },
   "dependencies": {

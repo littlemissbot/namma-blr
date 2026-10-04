@@ -33,7 +33,8 @@ const STATUS_GROUPS = [
     <label>
       <span>{t("map.ward_layer")}</span>
       <select id="m-wards">
-        <option value="bbmp243" selected>{t("map.ward_bbmp243")}</option>
+        <option value="gba2025" selected>{t("map.ward_gba2025")}</option>
+        <option value="bbmp243">{t("map.ward_bbmp243")}</option>
         <option value="bbmp198">{t("map.ward_bbmp198")}</option>
         <option value="">{t("map.ward_none")}</option>
       </select>
@@ -43,6 +44,17 @@ const STATUS_GROUPS = [
       <select id="m-agency">
         <option value="">{t("common.all")}</option>
         {agencies.map((a) => <option value={a}>{a}</option>)}
+      </select>
+    </label>
+    <label class="check"><input type="checkbox" id="m-corps" checked /> {t("map.corporations_toggle")}</label>
+    <label class="check"><input type="checkbox" id="m-lakes" checked /> {t("map.lakes_toggle")}</label>
+    <label id="m-lake-range-wrap">
+      <span>{t("map.lake_range")}</span>
+      <select id="m-lake-range">
+        <option value="all">{t("map.lake_range_all")}</option>
+        <option value="gba">{t("map.lake_range_gba")}</option>
+        <option value="near">{t("map.lake_range_near")}</option>
+        <option value="ride">{t("map.lake_range_ride")}</option>
       </select>
     </label>
     <button type="button" id="m-locate" class="btn">{t("map.locate")}</button>
@@ -70,6 +82,11 @@ const STATUS_GROUPS = [
         <li><i class="line line-medium"></i>{t("map.confidence_medium")}</li>
         <li><i class="line line-low"></i>{t("map.confidence_low")}</li>
         <li><i class="dot-approx"></i>{t("map.approximate")}</li>
+      </ul>
+      <p class="legend-title">{t("map.legend_context")}</p>
+      <ul>
+        <li><i class="line line-corp"></i>{t("map.corporations_toggle")}</li>
+        <li><i class="swatch swatch-lake"></i><span id="m-lake-count">{t("map.lakes_toggle")}</span></li>
       </ul>
       <p class="privacy">{t("map.privacy")}</p>
     </aside>
@@ -142,6 +159,10 @@ const STATUS_GROUPS = [
     margin: 0 0.55rem;
   }
   .privacy { font-size: 0.78rem; color: var(--ink-muted); margin: 0; }
+  .swatch-lake { background: #2f86b3; border: 1.5px solid #fff; box-shadow: 0 0 0 1px #2f86b3; }
+  .line-corp { border-top-width: 2.5px; opacity: 0.75; }
+  .map-controls label.check { flex-direction: row; align-items: center; gap: 0.4rem; color: var(--ink); font-size: 0.88rem; padding-bottom: 0.5rem; }
+  :global(.map-panel .kn) { font-size: 0.85em; font-weight: 400; color: var(--ink-muted); }
 
   :global(.map-panel h2) { margin: 0 0 0.25rem; font-size: 1.15rem; }
   :global(.map-panel .meta) { font-size: 0.82rem; color: var(--ink-muted); margin: 0 0 0.5rem; }
@@ -165,12 +186,17 @@ const STATUS_GROUPS = [
   const STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
   const BENGALURU: [number, number] = [77.5946, 12.9716];
 
-  type WardScheme = "bbmp243" | "bbmp198";
+  type WardScheme = "gba2025" | "bbmp243" | "bbmp198";
+  const WARD_SCHEMES: WardScheme[] = ["gba2025", "bbmp243", "bbmp198"];
   const params = new URLSearchParams(location.search);
   const panel = document.getElementById("m-panel")!;
   const wardSelect = document.getElementById("m-wards") as HTMLSelectElement;
   const agencySelect = document.getElementById("m-agency") as HTMLSelectElement;
   const locateBtn = document.getElementById("m-locate") as HTMLButtonElement;
+  const corpsToggle = document.getElementById("m-corps") as HTMLInputElement;
+  const lakesToggle = document.getElementById("m-lakes") as HTMLInputElement;
+  const lakeRange = document.getElementById("m-lake-range") as HTMLSelectElement;
+  const LAKE = "#2f86b3"; // water; deliberately outside the status palette
 
   const css = getComputedStyle(document.documentElement);
   const cssVar = (name: string, fallback: string) => css.getPropertyValue(name).trim() || fallback;
@@ -228,15 +254,56 @@ const STATUS_GROUPS = [
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
 
   let projects: any = { type: "FeatureCollection", features: [] };
+  let lakes: any = { type: "FeatureCollection", features: [], loaded: false };
 
   map.on("load", async () => {
     projects = await (await fetch("/geo/projects.geojson")).json();
 
     // Ward layers first, so projects draw on top.
-    for (const scheme of ["bbmp243", "bbmp198"] as WardScheme[]) {
+    for (const scheme of WARD_SCHEMES) {
       map.addSource(`wards-${scheme}`, { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       map.addLayer({ id: `wards-${scheme}-line`, type: "line", source: `wards-${scheme}`, layout: { visibility: "none" }, paint: { "line-color": RULE, "line-width": 0.7, "line-opacity": 0.8 } });
       map.addLayer({ id: `wards-${scheme}-selected`, type: "line", source: `wards-${scheme}`, filter: ["==", ["get", "code"], ""], paint: { "line-color": INK, "line-width": 3 } });
+    }
+
+    // Greater Bengaluru: the five corporations, drawn over the ward lines.
+    map.addSource("corporations", { type: "geojson", data: await (await fetch("/geo/gba-corporations.json")).json() });
+    map.addLayer({ id: "corporations-line", type: "line", source: "corporations", paint: { "line-color": INK, "line-width": 2.2, "line-opacity": 0.75 } });
+    // Names need the basemap's fonts; without them (tiles unreachable) the ward card names the corporation instead.
+    if (map.getStyle().glyphs) {
+      map.addLayer({
+        id: "corporations-label",
+        type: "symbol",
+        source: "corporations",
+        layout: { "text-field": ["concat", ["get", "corporation"], " corporation"], "text-font": ["Noto Sans Bold"], "text-size": 13, "symbol-placement": "point", "text-allow-overlap": false },
+        paint: { "text-color": INK, "text-halo-color": cssVar("--paper", "#efe9d8"), "text-halo-width": 2 },
+      });
+    }
+
+    // Lakes (OpenStreetMap), under the project layers.
+    lakes = await (await fetch("/geo/lakes.json")).json();
+    map.addSource("lakes", { type: "geojson", data: lakes });
+    map.addLayer({
+      id: "lakes-point",
+      type: "circle",
+      source: "lakes",
+      paint: {
+        "circle-color": LAKE,
+        "circle-radius": ["interpolate", ["linear"], ["coalesce", ["get", "approx_hectares"], 1], 1, 3.5, 50, 6, 500, 10],
+        "circle-stroke-color": "#fff",
+        "circle-stroke-width": 1.2,
+        "circle-opacity": 0.9,
+      },
+    });
+    map.addLayer({ id: "lakes-selected", type: "circle", source: "lakes", filter: ["==", ["get", "osm"], ""], paint: { "circle-radius": 13, "circle-color": "rgba(0,0,0,0)", "circle-stroke-color": INK, "circle-stroke-width": 2.5 } });
+    const lakeCount = document.getElementById("m-lake-count")!;
+    if (!lakes.loaded || lakes.features.length === 0) {
+      lakesToggle.checked = false;
+      lakesToggle.disabled = true;
+      lakeRange.disabled = true;
+      lakeCount.textContent = t("map.lakes_pending");
+    } else {
+      lakeCount.textContent = t("map.lakes_count", { n: lakes.features.length });
     }
 
     map.addSource("projects", { type: "geojson", data: projects });
@@ -267,8 +334,16 @@ const STATUS_GROUPS = [
       if (f) showProject(f.properties);
     }
     if (params.get("locate") === "1") locateBtn.click();
+    const wantedLake = params.get("lake");
+    if (wantedLake) {
+      const f = lakes.features.find((f: any) => f.properties.osm === wantedLake);
+      if (f) {
+        showLake(f.properties, f.geometry.coordinates);
+        map.flyTo({ center: f.geometry.coordinates, zoom: 13 });
+      }
+    }
     const ward = params.get("ward");
-    if (ward && /^bbmp(243|198):\d+$/.test(ward)) {
+    if (ward && /^(bbmp(243|198):\d+|gba2025:[1-5]-\d+)$/.test(ward)) {
       const scheme = ward.split(":")[0] as WardScheme;
       wardSelect.value = scheme;
       await setWardLayer(scheme);
@@ -287,8 +362,58 @@ const STATUS_GROUPS = [
   }
   agencySelect.addEventListener("input", applyAgencyFilter);
 
+  // Lakes: on/off and a distance filter for picking drive or ride spots.
+  function applyLakeFilter() {
+    if (!map.getLayer("lakes-point")) return;
+    map.setLayoutProperty("lakes-point", "visibility", lakesToggle.checked ? "visible" : "none");
+    const range = lakeRange.value;
+    const filter =
+      range === "gba" ? ["!=", ["get", "ward"], null]
+      : range === "near" ? ["<=", ["get", "distance_km"], 25]
+      : range === "ride" ? ["all", [">", ["get", "distance_km"], 25], ["<=", ["get", "distance_km"], 60]]
+      : null;
+    map.setFilter("lakes-point", filter as any);
+    if (range === "ride" && lakesToggle.checked) map.flyTo({ center: BENGALURU, zoom: 9 });
+  }
+  lakesToggle.addEventListener("input", applyLakeFilter);
+  lakeRange.addEventListener("input", applyLakeFilter);
+
+  function showLake(p: any, [lon, lat]: number[]) {
+    // Many ward names already end in "Ward" ("K Kamaraj Ward"); don't say it twice.
+    const wardName = String(p.ward_name ?? p.ward).replace(/\s+ward$/i, "");
+    const where = p.ward
+      ? t("map.lake_in_ward", { ward: wardName, corporation: p.corporation ?? "" })
+      : t("map.lake_outside");
+    const size = p.approx_hectares ? t("map.lake_size", { ha: p.approx_hectares }) : "";
+    panel.innerHTML = `
+      <h2>${esc(p.name)}${p.name_kn ? ` <span class="kn" lang="kn">${esc(p.name_kn)}</span>` : ""}</h2>
+      <p class="meta">${esc(t(`map.lake_kind_${p.kind}`))} · ${esc(where)}</p>
+      <dl>
+        <dt>${esc(t("map.lake_distance"))}</dt><dd>${esc(t("map.lake_km", { km: p.distance_km }))}</dd>
+        ${size ? `<dt>${esc(t("map.lake_size_label"))}</dt><dd>${esc(size)}</dd>` : ""}
+      </dl>
+      <p>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}" target="_blank" rel="noopener">${esc(t("map.lake_directions"))} →</a>
+        · <a href="https://www.openstreetmap.org/${esc(p.osm)}" target="_blank" rel="noopener">OpenStreetMap</a>
+      </p>
+      <p class="muted">${esc(t("map.lake_note"))}</p>`;
+    if (map.getLayer("lakes-selected")) map.setFilter("lakes-selected", ["==", ["get", "osm"], p.osm]);
+    setUrl("lake", p.osm);
+  }
+
+  function setCorporations(visible: boolean) {
+    for (const id of ["corporations-line", "corporations-label"]) if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
+  }
+  corpsToggle.addEventListener("input", () => setCorporations(corpsToggle.checked));
+
+  let formerWards: Record<string, Record<string, [string, string | null, number][]>> | null = null;
+  async function loadFormerWards() {
+    formerWards ??= await (await fetch("/geo/gba2025-former-wards.json")).json();
+    return formerWards!;
+  }
+
   async function setWardLayer(scheme: WardScheme | "") {
-    for (const s of ["bbmp243", "bbmp198"]) {
+    for (const s of WARD_SCHEMES) {
       if (map.getLayer(`wards-${s}-line`)) map.setLayoutProperty(`wards-${s}-line`, "visibility", s === scheme ? "visible" : "none");
       if (map.getLayer(`wards-${s}-selected`)) map.setFilter(`wards-${s}-selected`, ["==", ["get", "code"], ""]);
     }
@@ -296,7 +421,7 @@ const STATUS_GROUPS = [
   }
   wardSelect.addEventListener("input", () => setWardLayer(wardSelect.value as WardScheme | ""));
 
-  function setUrl(key: "project" | "ward", value: string) {
+  function setUrl(key: "project" | "ward" | "lake", value: string) {
     const next = new URLSearchParams();
     next.set(key, value);
     history.replaceState(null, "", `${location.pathname}?${next}`);
@@ -314,8 +439,18 @@ const STATUS_GROUPS = [
     setUrl("project", p.id);
   }
 
-  function showWard(scheme: WardScheme, ward: any, move = true) {
-    const { code, ward_no, name } = ward.properties;
+  async function showWard(scheme: WardScheme, ward: any, move = true) {
+    const { code, ward_no, name, name_kn, corporation, assembly_constituency } = ward.properties;
+    let about = esc(t(`map.ward_scheme_${scheme}`));
+    if (scheme === "gba2025") {
+      about = esc(t("map.gba_ward_line", { corporation: corporation ?? "", ac: assembly_constituency ?? "" }));
+      const former = (await loadFormerWards())[code] ?? {};
+      const list = (s: string) => (former[s] ?? []).map(([c, n]) => `${c.split(":")[1]}${n ? ` (${n})` : ""}`).join(", ");
+      if (former.bbmp243) about += `<br>${esc(t("map.former_243"))}: ${esc(list("bbmp243"))}`;
+      if (former.bbmp198) about += `<br>${esc(t("map.former_198"))}: ${esc(list("bbmp198"))}`;
+    } else {
+      about += `. ${esc(t("map.bbmp_note"))}`;
+    }
     map.setFilter(`wards-${scheme}-selected`, ["==", ["get", "code"], code]);
     const inWard = projects.features
       .filter((f: any) => {
@@ -325,8 +460,8 @@ const STATUS_GROUPS = [
       .map((f: any) => f.properties);
     const unique = [...new Map(inWard.map((p: any) => [p.id, p])).values()] as any[];
     panel.innerHTML = `
-      <h2>${esc(t("map.ward_result", { number: ward_no, name: name ?? "" }))}</h2>
-      <p class="meta">${esc(t(`map.ward_scheme_${scheme}`))}. ${esc(t("map.gba_pending"))}</p>
+      <h2>${esc(t("map.ward_result", { number: ward_no, name: name ?? "" }))}${name_kn ? ` <span class="kn" lang="kn">${esc(name_kn)}</span>` : ""}</h2>
+      <p class="meta">${about}</p>
       <p><strong>${esc(t("map.ward_projects"))}</strong></p>
       ${
         unique.length
@@ -351,7 +486,7 @@ const STATUS_GROUPS = [
   }
 
   async function lookupWard(lngLat: [number, number]) {
-    const scheme = (wardSelect.value || "bbmp243") as WardScheme;
+    const scheme = (wardSelect.value || "gba2025") as WardScheme;
     if (!wardSelect.value) {
       wardSelect.value = scheme;
       await setWardLayer(scheme);
@@ -364,8 +499,10 @@ const STATUS_GROUPS = [
 
   map.on("click", (e) => {
     const hit = map.queryRenderedFeatures(e.point, { layers: PROJECT_LAYERS.filter((l) => map.getLayer(l)) })[0];
-    if (hit) showProject(hit.properties);
-    else lookupWard([e.lngLat.lng, e.lngLat.lat]);
+    if (hit) return showProject(hit.properties);
+    const lake = map.getLayer("lakes-point") && map.queryRenderedFeatures(e.point, { layers: ["lakes-point"] })[0];
+    if (lake) return showLake(lake.properties, (lake.geometry as any).coordinates);
+    lookupWard([e.lngLat.lng, e.lngLat.lat]);
   });
 
   // Hover card on devices with a mouse (spec §5.1: name, latest cost, status).
@@ -382,6 +519,17 @@ const STATUS_GROUPS = [
       popup.remove();
     });
   }
+
+  map.on("mousemove", "lakes-point", (e) => {
+    const p = e.features?.[0]?.properties;
+    if (!p) return;
+    map.getCanvas().style.cursor = "pointer";
+    popup.setLngLat(e.lngLat).setHTML(`<strong>${esc(p.name)}</strong><br>${esc(t("map.lake_km", { km: p.distance_km }))}`).addTo(map);
+  });
+  map.on("mouseleave", "lakes-point", () => {
+    map.getCanvas().style.cursor = "";
+    popup.remove();
+  });
 
   let marker: maplibregl.Marker | null = null;
   locateBtn.addEventListener("click", () => {
